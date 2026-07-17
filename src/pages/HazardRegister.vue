@@ -73,6 +73,28 @@ const toggleAction = (act) => {
   }
 };
 
+// Bulk Action options
+const bulkActions = ['Export CSV Register', 'Mitigate Selected', 'Archive Selected'];
+
+const handleBulkAction = (event) => {
+  const { action, ids } = event;
+  if (action === 'Mitigate Selected') {
+    ids.forEach(id => {
+      const haz = store.hazards.find(h => h.id === id);
+      if (haz) {
+        haz.status = 'Mitigated';
+        haz.residualRiskScore = Math.min(haz.residualRiskScore, 40); // reduce risk to safer level
+      }
+    });
+    store.addToast(`Mitigated ${ids.length} selected hazards.`, 'success');
+  } else if (action === 'Archive Selected') {
+    store.hazards = store.hazards.filter(h => !ids.includes(h.id));
+    store.addToast(`Archived ${ids.length} selected hazards.`, 'success');
+  } else {
+    store.addToast(`Bulk action "${action}" completed for ${ids.length} hazards.`);
+  }
+};
+
 // Add mock control to selected hazard
 const newControlDesc = ref('');
 const newControlHierarchy = ref('PPE');
@@ -106,6 +128,10 @@ const submitControl = () => {
         :columns="columns"
         :items="store.hazards"
         :filters="filters"
+        :bulkActions="bulkActions"
+        @bulk-action="handleBulkAction"
+        row-clickable
+        @row-click="item => store.navigateTo('hazards', { hazardId: item.id })"
         searchPlaceholder="Search hazards by title, category, project, assessor, location..."
       >
         <!-- Custom Cells -->
@@ -115,7 +141,7 @@ const submitControl = () => {
 
         <template #cell-name="{ item }">
           <button
-            @click="openDetail(item)"
+            @click.stop="store.navigateTo('hazards', { hazardId: item.id })"
             class="font-semibold text-brand-600 hover:text-brand-800 hover:underline text-left block max-w-[220px] truncate"
           >
             {{ item.name }}

@@ -17,12 +17,24 @@ import {
 
 // Computed selected project
 const project = computed(() => {
+  if (store.selectedProjectId === 'all') {
+    const dates = store.projects.map(p => p.reviewDueDate).filter(Boolean);
+    const earliestDate = dates.length ? dates.sort()[0] : '-';
+    return {
+      id: 'all',
+      name: 'All Projects',
+      client: 'Multiple Clients',
+      manager: 'Various Managers',
+      location: 'Multiple Locations',
+      reviewDueDate: earliestDate
+    };
+  }
   return store.projects.find(p => p.id === store.selectedProjectId) || store.projects[0];
 });
 
 // Watch and reset selectedProjectId if invalid
 watch(() => store.projects, (newProjects) => {
-  if (newProjects.length && !newProjects.some(p => p.id === store.selectedProjectId)) {
+  if (newProjects.length && store.selectedProjectId !== 'all' && !newProjects.some(p => p.id === store.selectedProjectId)) {
     store.selectedProjectId = newProjects[0].id;
   }
 });
@@ -30,6 +42,7 @@ watch(() => store.projects, (newProjects) => {
 // Computed list of assessments belonging to the selected project
 const projectAssessments = computed(() => {
   if (!project.value) return [];
+  if (project.value.id === 'all') return store.assessments;
   return store.assessments.filter(a => a.projectId === project.value.id);
 });
 
@@ -66,15 +79,25 @@ const handleCreateNew = () => {
         <p class="text-xs text-slate-500 mt-1">Select a site to view safety assessments, active hazards, and start review cycles.</p>
       </div>
 
-      <!-- Dropdown selector -->
-      <div class="flex items-center gap-2.5">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active Site:</label>
-        <select
-          v-model="store.selectedProjectId"
-          class="border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white text-slate-700 shadow-sm"
+      <!-- Dropdown and actions selector -->
+      <div class="flex items-center gap-3">
+        <button
+          @click="store.navigateTo('hazards')"
+          class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold text-xs px-3.5 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all duration-150"
         >
-          <option v-for="p in store.projects" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
+          <span>Hazard Register</span>
+        </button>
+        <!-- Dropdown selector -->
+        <div class="flex items-center gap-2.5">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Active Site:</label>
+          <select
+            v-model="store.selectedProjectId"
+            class="border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 bg-white text-slate-700 shadow-sm"
+          >
+            <option value="all">All Projects</option>
+            <option v-for="p in store.projects" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -149,6 +172,7 @@ const handleCreateNew = () => {
         <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+              <th class="px-5 py-3.5">Project</th>
               <th class="px-5 py-3.5">RI&E Assessment / Description</th>
               <th class="px-5 py-3.5">Assessment Area</th>
               <th class="px-5 py-3.5 text-center">Version</th>
@@ -161,7 +185,15 @@ const handleCreateNew = () => {
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            <tr v-for="ass in filteredAssessments" :key="ass.id" class="hover:bg-slate-50 transition-colors">
+            <tr
+              v-for="ass in filteredAssessments"
+              :key="ass.id"
+              class="hover:bg-slate-50 transition-colors cursor-pointer"
+              @click="store.navigateTo('assessments', { assessmentId: ass.id })"
+            >
+              <td class="px-5 py-4 font-semibold text-slate-700">
+                {{ ass.projectName }}
+              </td>
               <td class="px-5 py-4">
                 <span class="block font-bold text-slate-800 text-sm leading-snug">{{ ass.title }}</span>
                 <span class="block text-[10px] text-slate-400 mt-1 truncate max-w-xs">{{ ass.description }}</span>
@@ -195,7 +227,7 @@ const handleCreateNew = () => {
               <td class="px-5 py-4 text-right">
                 <div class="flex items-center justify-end gap-1.5">
                   <button
-                    @click="handleStartReview(ass)"
+                    @click.stop="handleStartReview(ass)"
                     class="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1"
                     title="Audit Review"
                   >
@@ -203,7 +235,7 @@ const handleCreateNew = () => {
                     <span>Audit Review</span>
                   </button>
                   <button
-                    @click="store.selectedAssessmentId = ass.id; store.navigateTo('compare')"
+                    @click.stop="store.selectedAssessmentId = ass.id; store.navigateTo('compare')"
                     class="bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1"
                     title="Compare Versions"
                   >
@@ -213,7 +245,7 @@ const handleCreateNew = () => {
               </td>
             </tr>
             <tr v-if="filteredAssessments.length === 0">
-              <td colspan="9" class="text-center py-12 text-slate-400">
+              <td colspan="10" class="text-center py-12 text-slate-400">
                 <div class="max-w-xs mx-auto">
                   <ClipboardList class="w-8 h-8 mx-auto text-slate-300 mb-2" />
                   <span class="block font-medium">No assessments exist for this project.</span>

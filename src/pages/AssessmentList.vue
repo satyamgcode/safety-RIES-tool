@@ -64,12 +64,20 @@ const handleExport = (title) => {
         <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight font-sans">RI&E Assessments</h1>
         <p class="text-xs text-slate-500 mt-1">Global list of all safety assessments, hazard indices, review lifecycles, and publication versions.</p>
       </div>
-      <button
-        @click="store.navigateTo('create-assessment')"
-        class="bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-md shadow-brand-500/10 flex items-center gap-2 transition-all duration-150 hover:scale-102"
-      >
-        <span>Create Assessment Wizard</span>
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          @click="store.navigateTo('hazards')"
+          class="bg-white hover:bg-slate-50 text-slate-750 border border-slate-250 font-semibold text-sm px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2 transition-all duration-150"
+        >
+          <span>Hazard Register</span>
+        </button>
+        <button
+          @click="store.navigateTo('create-assessment')"
+          class="bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-md shadow-brand-500/10 flex items-center gap-2 transition-all duration-150 hover:scale-102"
+        >
+          <span>Create Assessment Wizard</span>
+        </button>
+      </div>
     </div>
 
     <!-- Data Table Card -->
@@ -79,6 +87,8 @@ const handleExport = (title) => {
         :items="store.assessments"
         :filters="filters"
         :bulkActions="bulkActions"
+        row-clickable
+        @row-click="item => store.navigateTo('assessments', { assessmentId: item.id })"
         searchPlaceholder="Search assessments by project, title, assessor, location..."
         @bulk-action="handleBulkAction"
       >
@@ -98,7 +108,7 @@ const handleExport = (title) => {
 
         <template #cell-projectName="{ item }">
           <button
-            @click="store.navigateTo('projects', { projectId: item.projectId })"
+            @click.stop="store.navigateTo('projects', { projectId: item.projectId })"
             class="font-semibold text-slate-600 hover:text-brand-600 transition-colors text-left block max-w-[150px] truncate"
           >
             {{ item.projectName }}
@@ -107,7 +117,7 @@ const handleExport = (title) => {
 
         <template #cell-title="{ item }">
           <button
-            @click="store.navigateTo('assessments', { assessmentId: item.id })"
+            @click.stop="store.navigateTo('assessments', { assessmentId: item.id })"
             class="font-semibold text-brand-600 hover:text-brand-800 hover:underline text-left block max-w-[200px] truncate"
           >
             {{ item.title }}
@@ -148,28 +158,28 @@ const handleExport = (title) => {
         <template #cell-actions="{ item }">
           <div class="flex items-center justify-end gap-0.5">
             <button
-              @click="store.navigateTo('assessments', { assessmentId: item.id })"
+              @click.stop="store.navigateTo('assessments', { assessmentId: item.id })"
               class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-50 rounded-lg transition-colors"
               title="View Detail"
             >
               <Eye class="w-4 h-4" />
             </button>
             <button
-              @click="store.cloneAssessment(item.id)"
+              @click.stop="store.cloneAssessment(item.id)"
               class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors"
               title="Clone Assessment"
             >
               <Copy class="w-4 h-4" />
             </button>
             <button
-              @click="store.navigateTo('review-queue')"
+              @click.stop="store.navigateTo('review-queue')"
               class="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-slate-50 rounded-lg transition-colors"
               title="Conduct Safety Review"
             >
               <ClipboardCheck class="w-4 h-4" />
             </button>
             <button
-              @click="handleExport(item.title)"
+              @click.stop="handleExport(item.title)"
               class="p-1.5 text-slate-400 hover:text-success-600 hover:bg-slate-50 rounded-lg transition-colors"
               title="Export PDF report"
             >

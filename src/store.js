@@ -18,8 +18,10 @@ export const store = reactive({
   archive: rawData.archive,
 
   // Selected state for the flow
-  selectedProjectId: 1, // Default selected project for the "Project RI&E List"
+  selectedProjectId: 'all', // Default selected project for the "Project RI&E List"
   selectedAssessmentId: 1, // Default selected assessment for review/comparison
+  lastAssessmentListPage: 'project-list', // Keeps track of where the user came from: 'project-list' or 'assessments'
+  lastHazardSource: 'register', // Keeps track of where the user came from: 'register' or 'assessment-details'
 
   // Settings Configuration
   settings: {
@@ -105,6 +107,89 @@ export const store = reactive({
     this.addToast(`New ${control.type} control applied. Residual risk score updated to ${haz.residualRiskScore}.`, 'success');
   },
 
+  addActionToHazard(hazardId, action) {
+    const haz = this.hazards.find(h => h.id === hazardId);
+    if (!haz) return;
+
+    const nextId = Math.max(...this.actions.map(a => a.id)) + 1;
+    const newAct = {
+      id: nextId,
+      actionId: `ACT-${String(nextId).padStart(4, '0')}`,
+      title: action.title,
+      description: action.description || '',
+      hazardId: haz.id,
+      hazardName: haz.name,
+      hazardUid: haz.hazardId,
+      assessmentId: haz.assessmentId,
+      assessmentName: haz.assessmentName,
+      projectId: haz.projectId,
+      projectName: haz.projectName,
+      assignedTo: action.assignedTo,
+      priority: action.priority,
+      dueDate: action.dueDate,
+      status: 'Open',
+      progress: 0,
+      comments: [],
+      attachments: [],
+      timeline: [
+        { date: new Date().toISOString().replace('T', ' ').substring(0, 16), text: "Action created by user." }
+      ]
+    };
+
+    this.actions.push(newAct);
+
+    // Recalculate open actions count on the hazard
+    const hazActions = this.actions.filter(act => act.hazardId === haz.id);
+    const openHazActions = hazActions.filter(act => act.status !== "Completed");
+    haz.openActionsCount = openHazActions.length;
+
+    // Recalculate open actions count on the assessment & project
+    const ass = this.assessments.find(a => a.id === haz.assessmentId);
+    if (ass) {
+      const assActions = this.actions.filter(act => act.assessmentId === ass.id && act.status !== "Completed");
+      ass.openActionsCount = assActions.length;
+    }
+    const p = this.projects.find(proj => proj.id === haz.projectId);
+    if (p) {
+      const pActions = this.actions.filter(act => act.projectId === p.id && act.status !== "Completed");
+      p.openActionsCount = pActions.length;
+    }
+
+    this.addToast(`Action "${newAct.title}" successfully spawned.`, 'success');
+  },
+
+  addActionComment(actionId, text, author) {
+    const act = this.actions.find(a => a.id === actionId);
+    if (!act) return;
+    if (!act.comments) {
+      act.comments = [];
+    }
+    act.comments.push({
+      author: author || 'User',
+      date: new Date().toISOString().replace('T', ' ').substring(0, 10),
+      text: text
+    });
+    this.addToast('Comment added successfully.', 'success');
+  },
+
+  deleteControlFromHazard(hazardId, controlId) {
+    const haz = this.hazards.find(h => h.id === hazardId);
+    if (!haz || !haz.controls) return;
+    haz.controls = haz.controls.filter(c => c.id !== controlId);
+
+    // Recalculate residual risk score
+    let factor = 1.0;
+    haz.controls.forEach(ctrl => {
+      const f = ctrl.type === 'Elimination' ? 0.1 : (ctrl.type === 'Engineering' ? 0.4 : 0.7);
+      factor = factor * f;
+    });
+    haz.residualLikelihood = Math.max(1, Math.round(haz.likelihood * factor));
+    haz.residualExposure = Math.max(1, Math.round(haz.exposure * factor));
+    haz.residualRiskScore = calculateKinneyScore(haz.residualLikelihood, haz.residualExposure, haz.residualSeverity);
+
+    this.addToast('Control removed. Residual risk score updated.', 'success');
+  },
+
   // --- ROUTING ACTIONS ---
   navigateTo(page, params = {}) {
     this.currentPage = page;
@@ -116,6 +201,18 @@ export const store = reactive({
     }
     if (params.assessmentId) {
       this.selectedAssessmentId = params.assessmentId;
+    }
+
+    if (page === 'project-list') {
+      this.lastAssessmentListPage = 'project-list';
+    } else if (page === 'assessments' && !params.assessmentId) {
+      this.lastAssessmentListPage = 'assessments';
+    }
+
+    if (page === 'hazards' && !params.hazardId) {
+      this.lastHazardSource = 'register';
+    } else if (page === 'assessments' && params.assessmentId) {
+      this.lastHazardSource = 'assessment-details';
     }
 
     let hash = `#/${page}`;
@@ -134,6 +231,18 @@ export const store = reactive({
       'archive', 'settings', 'reports', 'templates', 'risk-matrix', 'workflow'
     ];
     this.currentPage = validPages.includes(page) ? page : 'overview';
+
+    if (this.currentPage === 'project-list') {
+      this.lastAssessmentListPage = 'project-list';
+    } else if (this.currentPage === 'assessments' && !this.currentParams?.assessmentId) {
+      this.lastAssessmentListPage = 'assessments';
+    }
+
+    if (this.currentPage === 'hazards' && !this.currentParams?.hazardId) {
+      this.lastHazardSource = 'register';
+    } else if (this.currentPage === 'assessments' && this.currentParams?.assessmentId) {
+      this.lastHazardSource = 'assessment-details';
+    }
   },
 
   // --- DATA MUTATIONS FOR FLOW ---

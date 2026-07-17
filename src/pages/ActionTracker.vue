@@ -196,10 +196,10 @@ const submitComment = () => {
       </DataTable>
     </div>
 
-    <!-- Slide-over Action Details Modal -->
-    <div v-if="selectedAction" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-end">
-      <!-- Drawer Body -->
-      <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col p-6 overflow-y-auto animate-slide-in">
+    <!-- Action Details Popup Modal -->
+    <div v-if="selectedAction" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <!-- Modal Body -->
+      <div class="w-full max-w-lg bg-white max-h-[90vh] rounded-2xl shadow-2xl border border-slate-100 flex flex-col p-6 overflow-y-auto animate-fade-in custom-scrollbar">
         <!-- Close & Header -->
         <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
           <div>
@@ -331,11 +331,11 @@ const submitComment = () => {
 </template>
 
 <style scoped>
-.animate-slide-in {
-  animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes slideIn {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 </style>

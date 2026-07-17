@@ -34,10 +34,14 @@ const props = defineProps({
   bulkActions: {
     type: Array,
     default: () => [] // e.g., ['Export CSV', 'Archive Selected']
+  },
+  rowClickable: {
+    type: Boolean,
+    default: false
   }
 });
 
-const emit = defineEmits(['view', 'edit', 'bulk-action', 'selection-change']);
+const emit = defineEmits(['view', 'edit', 'bulk-action', 'selection-change', 'row-click']);
 
 // Core State
 const searchQuery = ref('');
@@ -343,7 +347,11 @@ const triggerBulk = (action) => {
               v-for="item in paginatedItems"
               :key="item.id"
               class="hover:bg-slate-50/80 transition-colors group"
-              :class="selectedRows.has(item.id) ? 'bg-brand-50/20' : ''"
+              :class="[
+                selectedRows.has(item.id) ? 'bg-brand-50/20' : '',
+                rowClickable ? 'cursor-pointer' : ''
+              ]"
+              @click="rowClickable && emit('row-click', item)"
             >
               <!-- Row Checkbox -->
               <td class="px-4 py-3.5 text-center align-middle">
