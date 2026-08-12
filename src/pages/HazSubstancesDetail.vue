@@ -17,7 +17,9 @@ import {
   AlertCircle,
   Eye,
   Settings,
-  History
+  History,
+  User,
+  Clock
 } from 'lucide-vue-next';
 
 // Active substance from route parameter
@@ -119,10 +121,90 @@ const getGhsExplanation = (pic) => {
   return explanations[pic] || 'No description available.';
 };
 
-// SDS Status simulation buttons
+// SDS Date Simulation Buttons for Demo
 const setSdsStatus = (status) => {
   store.updateSdsStatus(substance.value.id, status);
 };
+
+// --- SUBSTANCE SAFETY REVIEWS & AUDITS FLOW ---
+const showPerformReviewModal = ref(false);
+const reviewType = ref('Full Substance Audit');
+const reviewerName = ref('Senior Safety Inspector');
+const reviewNotes = ref('');
+const reviewNextDate = ref('');
+const isSubmittingReview = ref(false);
+
+const openPerformReviewModal = () => {
+  reviewType.value = 'Full Substance Audit';
+  reviewerName.value = 'Senior Safety Inspector';
+  reviewNotes.value = '';
+  
+  // Default next review date to 1 year from now
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  reviewNextDate.value = nextYear.toISOString().split('T')[0];
+  
+  showPerformReviewModal.value = true;
+};
+
+const handleSaveReview = () => {
+  if (!reviewNotes.value.trim()) {
+    store.addToast('Please enter safety audit notes before saving.', 'error');
+    return;
+  }
+  if (!reviewNextDate.value) {
+    store.addToast('Please specify the next review date.', 'error');
+    return;
+  }
+
+  isSubmittingReview.value = true;
+  setTimeout(() => {
+    store.conductSubstanceReview(substance.value.id, {
+      type: reviewType.value,
+      reviewer: reviewerName.value,
+      notes: reviewNotes.value,
+      nextReviewDate: reviewNextDate.value
+    });
+    isSubmittingReview.value = false;
+    showPerformReviewModal.value = false;
+  }, 600);
+};
+
+// Dynamic computed review status
+const substanceReviewStatus = computed(() => {
+  if (!substance.value) return { status: 'Unknown', color: 'bg-slate-100 text-slate-500 border-slate-200' };
+  
+  const todayStr = new Date().toISOString().split('T')[0];
+  const sdsNext = substance.value.sds.nextReviewDate;
+  const raNext = substance.value.riskAssessment.nextReviewDate;
+  
+  const dates = [];
+  if (sdsNext) dates.push({ date: sdsNext, type: 'SDS' });
+  if (raNext) dates.push({ date: raNext, type: 'Risk Assessment' });
+  
+  if (dates.length === 0) {
+    return { status: 'Pending Review', color: 'bg-orange-50 text-orange-700 border-orange-200' };
+  }
+  
+  // Check if any is overdue
+  const overdueType = dates.find(d => d.date < todayStr);
+  if (overdueType) {
+    return { status: 'Overdue', details: `${overdueType.type} review overdue`, color: 'bg-red-50 text-red-700 border-red-100' };
+  }
+  
+  // Check if any is due soon (within 30 days)
+  const today = new Date();
+  const thirtyDaysLater = new Date();
+  thirtyDaysLater.setDate(today.getDate() + 30);
+  const thirtyDaysLaterStr = thirtyDaysLater.toISOString().split('T')[0];
+  
+  const dueSoonType = dates.find(d => d.date >= todayStr && d.date <= thirtyDaysLaterStr);
+  if (dueSoonType) {
+    return { status: 'Due Soon', details: `${dueSoonType.type} due by ${dueSoonType.date}`, color: 'bg-yellow-50 text-yellow-700 border-yellow-200' };
+  }
+  
+  return { status: 'Current', details: 'All reviews up to date', color: 'bg-success-50 text-success-700 border-success-100' };
+});
 </script>
 
 <template>
@@ -149,6 +231,13 @@ const setSdsStatus = (status) => {
             ]"
           >
             {{ substance.status }}
+          </span>
+          <span
+            v-if="substance.status !== 'Draft'"
+            class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border flex items-center gap-1"
+            :class="substanceReviewStatus.color"
+          >
+            <span>Review: {{ substanceReviewStatus.status }}</span>
           </span>
         </div>
         <p class="text-xs text-slate-500 font-semibold">{{ substance.manufacturer }}</p>
@@ -177,7 +266,7 @@ const setSdsStatus = (status) => {
     <!-- Tabs Navigation Bar -->
     <div class="flex border-b border-slate-100 overflow-x-auto gap-1">
       <button
-        v-for="tab in ['overview', 'hazards', 'sds', 'risk-assessment']"
+        v-for="tab in ['overview', 'hazards', 'sds', 'risk-assessment', 'reviews']"
         :key="tab"
         @click="activeTab = tab"
         class="px-5 py-3 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap"
@@ -575,6 +664,128 @@ const setSdsStatus = (status) => {
         </div>
       </div>
 
+      <!-- REVIEWS & AUDITS TAB -->
+      <div v-if="activeTab === 'reviews'" class="space-y-6 animate-fade-in">
+        <div class="border-b border-slate-50 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Safety Audits & Reviews</h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">Track historical hazard reviews, SDS update logs, and scheduled review dates.</p>
+          </div>
+          <button
+            v-if="substance.status !== 'Archived'"
+            @click="openPerformReviewModal"
+            class="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer shadow-sm shadow-brand-500/10"
+          >
+            <CheckCircle2 class="w-4 h-4" />
+            <span>Perform Safety Review</span>
+          </button>
+        </div>
+
+        <!-- Review Status Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          <!-- Dynamic review status -->
+          <div class="p-5 rounded-2xl border flex flex-col justify-between" :class="substanceReviewStatus.color">
+            <div class="flex items-center justify-between">
+              <span class="text-[9px] font-extrabold uppercase tracking-wider">Overall Status</span>
+              <span class="w-2.5 h-2.5 rounded-full"
+                :class="[
+                  substanceReviewStatus.status === 'Current' ? 'bg-success-500' : '',
+                  substanceReviewStatus.status === 'Due Soon' ? 'bg-yellow-500' : '',
+                  substanceReviewStatus.status === 'Overdue' ? 'bg-red-500' : '',
+                  substanceReviewStatus.status === 'Pending Review' ? 'bg-orange-500' : ''
+                ]"
+              ></span>
+            </div>
+            <div class="mt-2.5">
+              <span class="text-2xl font-black block leading-none">{{ substanceReviewStatus.status }}</span>
+              <span class="text-[9px] font-bold opacity-75 mt-1.5 block uppercase tracking-wider">
+                {{ substanceReviewStatus.details || 'No scheduled reviews' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- SDS Review Date -->
+          <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-between">
+            <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">SDS Next Review</span>
+            <div class="mt-2.5">
+              <span class="text-base font-black text-slate-800 block leading-none">
+                {{ substance.sds.nextReviewDate || 'Required' }}
+              </span>
+              <span class="text-[9px] font-bold text-slate-400 mt-1.5 block uppercase tracking-wider">
+                Last Revision: {{ substance.sds.revisionDate || 'N/A' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Risk Assessment Review Date -->
+          <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-between">
+            <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Risk Assessment Next Review</span>
+            <div class="mt-2.5">
+              <span class="text-base font-black text-slate-800 block leading-none">
+                {{ substance.riskAssessment.nextReviewDate || 'Required' }}
+              </span>
+              <span class="text-[9px] font-bold text-slate-400 mt-1.5 block uppercase tracking-wider">
+                Last Audit: {{ substance.riskAssessment.lastReviewedDate || 'Pending' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review History List -->
+        <div class="space-y-4 pt-2">
+          <div class="flex items-center gap-1.5 text-slate-500">
+            <History class="w-4.5 h-4.5" />
+            <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Substance Audit Log</h4>
+          </div>
+
+          <div class="border border-slate-100 rounded-xl overflow-hidden">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+                  <th class="px-4 py-3">Audit Date</th>
+                  <th class="px-4 py-3">Reviewer / Inspector</th>
+                  <th class="px-4 py-3">Type</th>
+                  <th class="px-4 py-3">Audit Remarks & Notes</th>
+                  <th class="px-4 py-3 text-right">Next Review Due</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-600 font-medium">
+                <tr v-if="!substance.reviews?.length">
+                  <td colspan="5" class="py-6 text-center text-slate-400 italic">
+                    No historical audits logged for this substance.
+                  </td>
+                </tr>
+                <tr v-for="rev in substance.reviews" :key="rev.id" class="hover:bg-slate-50/30 transition-colors">
+                  <td class="px-4 py-3.5 font-bold text-slate-800 whitespace-nowrap">{{ rev.date }}</td>
+                  <td class="px-4 py-3.5 whitespace-nowrap">
+                    <div class="flex items-center gap-1.5 font-bold text-slate-700">
+                      <div class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] text-slate-500 border border-slate-200 shadow-xs shrink-0 select-none">
+                        👤
+                      </div>
+                      <span>{{ rev.reviewer }}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5 whitespace-nowrap">
+                    <span
+                      class="px-2 py-0.5 rounded text-[10px] font-extrabold border"
+                      :class="[
+                        rev.type === 'Full Substance Audit' ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : '',
+                        rev.type === 'SDS Review' ? 'bg-amber-50 border-amber-100 text-amber-700' : '',
+                        rev.type === 'Risk Assessment Review' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : ''
+                      ]"
+                    >
+                      {{ rev.type }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3.5 text-slate-500 max-w-sm truncate" :title="rev.notes">{{ rev.notes }}</td>
+                  <td class="px-4 py-3.5 text-right font-bold text-slate-500 whitespace-nowrap">{{ rev.nextReviewDate }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- EDIT SDS DETAILS MODAL -->
@@ -653,6 +864,81 @@ const setSdsStatus = (status) => {
           >
             <span v-if="isSavingSds">Saving...</span>
             <span v-else>Save Changes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORM SAFETY REVIEW MODAL -->
+    <div v-if="showPerformReviewModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 animate-scale-in">
+        <div class="flex items-center justify-between border-b border-slate-50 pb-3">
+          <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Perform Safety Review</h3>
+          <button @click="showPerformReviewModal = false" class="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer">
+            Close
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Review Type -->
+          <div class="flex flex-col">
+            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Review Scope / Type *</label>
+            <select
+              v-model="reviewType"
+              class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+            >
+              <option value="Full Substance Audit">Full Substance Audit (SDS & Risk Assessment)</option>
+              <option value="SDS Review">SDS Dates & Compliance Review</option>
+              <option value="Risk Assessment Review">Kinney Controls & Risk Evaluation</option>
+            </select>
+          </div>
+
+          <!-- Reviewer Name -->
+          <div class="flex flex-col">
+            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Safety Inspector / Auditor *</label>
+            <input
+              v-model="reviewerName"
+              type="text"
+              class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+            />
+          </div>
+
+          <!-- Audit Notes -->
+          <div class="flex flex-col">
+            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Audit Findings & Remarks *</label>
+            <textarea
+              v-model="reviewNotes"
+              rows="4"
+              placeholder="Outline storage check findings, correct PPE usage, package integrity, or SDS check notes..."
+              class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Next Review Date -->
+          <div class="flex flex-col">
+            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Rescheduled Next Review Date *</label>
+            <input
+              v-model="reviewNextDate"
+              type="date"
+              class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+            />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button
+            @click="showPerformReviewModal = false"
+            class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handleSaveReview"
+            :disabled="isSubmittingReview"
+            class="bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
+          >
+            <span v-if="isSubmittingReview">Logging Review...</span>
+            <span v-else>Log Safety Audit</span>
           </button>
         </div>
       </div>

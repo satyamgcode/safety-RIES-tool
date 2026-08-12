@@ -24,26 +24,52 @@ const restrictedCount = computed(() => store.substances.filter(s => s.status ===
 // Attention items
 const attentionItems = computed(() => {
   const items = [];
+  const todayStr = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const thirtyDaysLater = new Date();
+  thirtyDaysLater.setDate(today.getDate() + 30);
+  const thirtyDaysLaterStr = thirtyDaysLater.toISOString().split('T')[0];
+
   store.substances.forEach(sub => {
-    if (sub.sds.status === 'Overdue') {
+    // 1. SDS Overdue Check (by status or next review date)
+    const isSdsOverdue = sub.sds.status === 'Overdue' || (sub.sds.nextReviewDate && sub.sds.nextReviewDate < todayStr);
+    if (isSdsOverdue) {
       items.push({
         id: sub.id,
         substance: sub.name,
         type: 'sds-overdue',
-        label: 'SDS overdue',
+        label: `SDS review overdue (${sub.sds.nextReviewDate || 'Required'})`,
         color: 'bg-red-50 border-red-100 text-red-800',
         badgeColor: 'bg-red-500 text-white',
         icon: AlertCircle,
-        actionLabel: 'View',
-        action: () => store.navigateTo('haz-substances-detail', { substanceId: sub.id, tab: 'sds' })
+        actionLabel: 'Audit SDS',
+        action: () => store.navigateTo('haz-substances-detail', { substanceId: sub.id, tab: 'reviews' })
       });
     }
+
+    // 2. Risk Assessment Overdue Check
+    const isRaOverdue = sub.riskAssessment.nextReviewDate && sub.riskAssessment.nextReviewDate < todayStr;
+    if (isRaOverdue) {
+      items.push({
+        id: sub.id,
+        substance: sub.name,
+        type: 'ra-overdue',
+        label: `Risk assessment review overdue (${sub.riskAssessment.nextReviewDate})`,
+        color: 'bg-red-50 border-red-100 text-red-800',
+        badgeColor: 'bg-red-500 text-white',
+        icon: ShieldAlert,
+        actionLabel: 'Audit RA',
+        action: () => store.navigateTo('haz-substances-detail', { substanceId: sub.id, tab: 'reviews' })
+      });
+    }
+
+    // 3. Risk Assessment Required (Initial)
     if (sub.riskAssessment.status === 'Required') {
       items.push({
         id: sub.id,
         substance: sub.name,
         type: 'ra-required',
-        label: 'Risk assessment required',
+        label: 'Initial risk assessment required',
         color: 'bg-orange-50 border-orange-100 text-orange-800',
         badgeColor: 'bg-orange-500 text-white',
         icon: ShieldAlert,
@@ -51,25 +77,46 @@ const attentionItems = computed(() => {
         action: () => store.navigateTo('haz-substances-assessment', { substanceId: sub.id })
       });
     }
-    if (sub.sds.status === 'Due Soon') {
+
+    // 4. SDS Due Soon Check
+    const isSdsDueSoon = sub.sds.status === 'Due Soon' || (sub.sds.nextReviewDate && sub.sds.nextReviewDate >= todayStr && sub.sds.nextReviewDate <= thirtyDaysLaterStr);
+    if (isSdsDueSoon && !isSdsOverdue) {
       items.push({
         id: sub.id,
         substance: sub.name,
         type: 'sds-due-soon',
-        label: 'SDS due soon',
+        label: `SDS review due soon (${sub.sds.nextReviewDate})`,
         color: 'bg-yellow-50 border-yellow-100 text-yellow-800',
         badgeColor: 'bg-yellow-500 text-slate-900',
         icon: AlertTriangle,
         actionLabel: 'Review',
-        action: () => store.navigateTo('haz-substances-detail', { substanceId: sub.id, tab: 'sds' })
+        action: () => store.navigateTo('haz-substances-detail', { substanceId: sub.id, tab: 'reviews' })
       });
     }
+
+    // 5. Risk Assessment Due Soon Check
+    const isRaDueSoon = sub.riskAssessment.nextReviewDate && sub.riskAssessment.nextReviewDate >= todayStr && sub.riskAssessment.nextReviewDate <= thirtyDaysLaterStr;
+    if (isRaDueSoon && !isRaOverdue) {
+      items.push({
+        id: sub.id,
+        substance: sub.name,
+        type: 'ra-due-soon',
+        label: `Risk assessment review due soon (${sub.riskAssessment.nextReviewDate})`,
+        color: 'bg-yellow-50 border-yellow-100 text-yellow-800',
+        badgeColor: 'bg-yellow-500 text-slate-900',
+        icon: AlertTriangle,
+        actionLabel: 'Review',
+        action: () => store.navigateTo('haz-substances-detail', { substanceId: sub.id, tab: 'reviews' })
+      });
+    }
+
+    // 6. Risk Assessment Marked for Review (due to hazard changes)
     if (sub.riskAssessment.status === 'Review Required') {
       items.push({
         id: sub.id,
         substance: sub.name,
         type: 'ra-review',
-        label: 'Risk assessment review required',
+        label: 'Risk assessment review required (hazards changed)',
         color: 'bg-amber-50 border-amber-100 text-amber-800',
         badgeColor: 'bg-amber-500 text-white',
         icon: ShieldAlert,

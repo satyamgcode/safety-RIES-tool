@@ -389,7 +389,17 @@ export const store = reactive({
         lastReviewedDate: "2024-04-15",
         nextReviewDate: "2025-04-15"
       },
-      status: "Active"
+      status: "Active",
+      reviews: [
+        {
+          id: 101,
+          date: "2024-04-15",
+          reviewer: "Sarah Jenkins",
+          type: "Risk Assessment Review",
+          notes: "Initial risk assessment review approved. Basic controls are sufficient.",
+          nextReviewDate: "2025-04-15"
+        }
+      ]
     },
     {
       id: 2,
@@ -439,7 +449,17 @@ export const store = reactive({
         lastReviewedDate: "2025-08-22",
         nextReviewDate: "2026-08-22"
       },
-      status: "Active"
+      status: "Active",
+      reviews: [
+        {
+          id: 102,
+          date: "2025-08-22",
+          reviewer: "Sarah Jenkins",
+          type: "Risk Assessment Review",
+          notes: "Periodic review. Ensure dust masks are stored properly and checked for seal integrity.",
+          nextReviewDate: "2026-08-22"
+        }
+      ]
     },
     {
       id: 3,
@@ -487,7 +507,17 @@ export const store = reactive({
         lastReviewedDate: "2025-01-15",
         nextReviewDate: "2026-01-15"
       },
-      status: "Restricted"
+      status: "Restricted",
+      reviews: [
+        {
+          id: 103,
+          date: "2025-01-15",
+          reviewer: "Sarah Jenkins",
+          type: "Full Substance Review",
+          notes: "Fuel store primer check and bunded tank integrity verified. No leakage found.",
+          nextReviewDate: "2026-01-15"
+        }
+      ]
     },
     {
       id: 4,
@@ -531,7 +561,8 @@ export const store = reactive({
         additionalControls: [],
         residualRisk: { likelihood: null, severity: null, riskScore: null, riskLevel: null }
       },
-      status: "Draft"
+      status: "Draft",
+      reviews: []
     }
   ],
 
@@ -1266,6 +1297,7 @@ export const store = reactive({
       unit: substanceData.unit,
       usedFor: substanceData.usedFor,
       status: 'Draft',
+      reviews: substanceData.reviews || [],
       
       sds: substanceData.sds || {
         fileName: '',
@@ -1394,6 +1426,69 @@ export const store = reactive({
 
     sub.sds.status = newStatus;
     this.addToast(`Simulated SDS status for "${sub.name}" updated to ${newStatus}.`, 'info');
+  },
+
+  conductSubstanceReview(substanceId, reviewData) {
+    const sub = this.substances.find(s => s.id === parseInt(substanceId, 10));
+    if (!sub) return;
+
+    const reviewId = sub.reviews && sub.reviews.length > 0 ? Math.max(...sub.reviews.map(r => r.id)) + 1 : 101;
+    const today = new Date().toISOString().split('T')[0];
+
+    const newReview = {
+      id: reviewId,
+      date: today,
+      reviewer: reviewData.reviewer || 'Senior Safety Inspector',
+      type: reviewData.type || 'Full Substance Audit',
+      notes: reviewData.notes || '',
+      nextReviewDate: reviewData.nextReviewDate
+    };
+
+    if (!sub.reviews) sub.reviews = [];
+    sub.reviews.unshift(newReview);
+
+    if (sub.status === 'Draft') {
+      sub.status = 'Active';
+    }
+
+    if (reviewData.type === 'SDS Review') {
+      sub.sds.revisionDate = today;
+      sub.sds.nextReviewDate = reviewData.nextReviewDate;
+      sub.sds.status = 'Current';
+    } else if (reviewData.type === 'Risk Assessment Review') {
+      sub.riskAssessment.lastReviewedDate = today;
+      sub.riskAssessment.nextReviewDate = reviewData.nextReviewDate;
+      if (sub.riskAssessment.status === 'Review Required' || sub.riskAssessment.status === 'Required') {
+        sub.riskAssessment.status = 'Approved';
+      }
+    } else {
+      sub.sds.revisionDate = today;
+      sub.sds.nextReviewDate = reviewData.nextReviewDate;
+      sub.sds.status = 'Current';
+
+      sub.riskAssessment.lastReviewedDate = today;
+      sub.riskAssessment.nextReviewDate = reviewData.nextReviewDate;
+      if (sub.riskAssessment.status === 'Review Required' || sub.riskAssessment.status === 'Required') {
+        sub.riskAssessment.status = 'Approved';
+      }
+    }
+
+    this.addToast(`Safety review logged for "${sub.name}".`, 'success');
+  },
+
+  conductAssessmentReview(reviewId, auditNotes, upgradeVersion) {
+    const rev = this.reviews.find(r => r.id === parseInt(reviewId, 10));
+    if (!rev) return;
+
+    rev.status = 'Completed';
+    rev.conductedDate = new Date().toISOString().split('T')[0];
+    rev.notes = auditNotes;
+
+    if (upgradeVersion) {
+      this.publishReviewedVersion(rev.assessmentId, auditNotes);
+    } else {
+      this.addToast(`Assessment "${rev.assessmentName}" review signed off.`, 'success');
+    }
   }
 });
 

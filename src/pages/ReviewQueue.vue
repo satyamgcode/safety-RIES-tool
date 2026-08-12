@@ -62,6 +62,102 @@ const submitReview = () => {
 
   activeReview.value = null;
 };
+
+// --- SUBSTANCE REVIEW QUEUE FLOW ---
+const activeQueueTab = ref('assessments');
+
+const pendingSubstanceReviews = computed(() => {
+  const items = [];
+  const todayStr = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const thirtyDaysLater = new Date();
+  thirtyDaysLater.setDate(today.getDate() + 30);
+  const thirtyDaysLaterStr = thirtyDaysLater.toISOString().split('T')[0];
+
+  store.substances.forEach(sub => {
+    const isSdsOverdue = sub.sds.status === 'Overdue' || (sub.sds.nextReviewDate && sub.sds.nextReviewDate < todayStr);
+    const isRaOverdue = sub.riskAssessment.nextReviewDate && sub.riskAssessment.nextReviewDate < todayStr;
+    const isRaRequired = sub.riskAssessment.status === 'Required';
+    
+    const isSdsDueSoon = sub.sds.status === 'Due Soon' || (sub.sds.nextReviewDate && sub.sds.nextReviewDate >= todayStr && sub.sds.nextReviewDate <= thirtyDaysLaterStr);
+    const isRaDueSoon = sub.riskAssessment.nextReviewDate && sub.riskAssessment.nextReviewDate >= todayStr && sub.riskAssessment.nextReviewDate <= thirtyDaysLaterStr;
+    const isRaReviewRequired = sub.riskAssessment.status === 'Review Required';
+
+    if (isSdsOverdue || isRaOverdue || isRaRequired || isSdsDueSoon || isRaDueSoon || isRaReviewRequired) {
+      let status = 'Scheduled';
+      if (isSdsOverdue || isRaOverdue) status = 'Overdue';
+      else if (isSdsDueSoon || isRaDueSoon || isRaReviewRequired) status = 'Due Soon';
+      else if (isRaRequired) status = 'Initial Required';
+
+      let reason = [];
+      if (isSdsOverdue) reason.push('SDS Overdue');
+      else if (isSdsDueSoon) reason.push('SDS Due Soon');
+
+      if (isRaRequired) reason.push('Initial RA Required');
+      else if (isRaOverdue) reason.push('RA Overdue');
+      else if (isRaDueSoon) reason.push('RA Due Soon');
+      else if (isRaReviewRequired) reason.push('RA Review Required (Hazards Changed)');
+
+      items.push({
+        id: sub.id,
+        substanceName: sub.name,
+        manufacturer: sub.manufacturer,
+        location: sub.location,
+        sdsNextReview: sub.sds.nextReviewDate || 'N/A',
+        raNextReview: sub.riskAssessment.nextReviewDate || 'N/A',
+        status: status,
+        reason: reason.join(', '),
+        substance: sub
+      });
+    }
+  });
+  return items;
+});
+
+const activeSubstanceReview = ref(null);
+const subReviewType = ref('Full Substance Audit');
+const subReviewerName = ref('Senior Safety Inspector');
+const subReviewNotes = ref('');
+const subReviewNextDate = ref('');
+const isSubmittingSubReview = ref(false);
+
+const startSubstanceReview = (item) => {
+  activeSubstanceReview.value = item;
+  subReviewType.value = 'Full Substance Audit';
+  subReviewerName.value = 'Senior Safety Inspector';
+  subReviewNotes.value = '';
+  
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  subReviewNextDate.value = nextYear.toISOString().split('T')[0];
+};
+
+const closeSubstanceReview = () => {
+  activeSubstanceReview.value = null;
+};
+
+const submitSubstanceReview = () => {
+  if (!subReviewNotes.value.trim()) {
+    store.addToast('Please enter safety audit notes before completing.', 'error');
+    return;
+  }
+  if (!subReviewNextDate.value) {
+    store.addToast('Please specify the next review date.', 'error');
+    return;
+  }
+
+  isSubmittingSubReview.value = true;
+  setTimeout(() => {
+    store.conductSubstanceReview(activeSubstanceReview.value.id, {
+      type: subReviewType.value,
+      reviewer: subReviewerName.value,
+      notes: subReviewNotes.value,
+      nextReviewDate: subReviewNextDate.value
+    });
+    isSubmittingSubReview.value = false;
+    activeSubstanceReview.value = null;
+  }, 600);
+};
 </script>
 
 <template>
@@ -111,6 +207,32 @@ const submitReview = () => {
       </div>
     </div>
 
+    <!-- Queue Tabs -->
+    <div class="flex border-b border-slate-100 mb-6 gap-1">
+      <button
+        @click="activeQueueTab = 'assessments'"
+        class="px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap"
+        :class="[
+          activeQueueTab === 'assessments'
+            ? 'border-brand-500 text-brand-600 font-black'
+            : 'border-transparent text-slate-400 hover:text-slate-600'
+        ]"
+      >
+        RI&E Assessments Queue ({{ pendingReviews.length }})
+      </button>
+      <button
+        @click="activeQueueTab = 'substances'"
+        class="px-5 py-2.5 text-xs font-extrabold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap"
+        :class="[
+          activeQueueTab === 'substances'
+            ? 'border-brand-500 text-brand-600 font-black'
+            : 'border-transparent text-slate-400 hover:text-slate-600'
+        ]"
+      >
+        Hazardous Substances Queue ({{ pendingSubstanceReviews.length }})
+      </button>
+    </div>
+
     <!-- Search bar -->
     <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between gap-4">
       <div class="relative flex-1 max-w-md">
@@ -131,8 +253,8 @@ const submitReview = () => {
       </div>
     </div>
 
-    <!-- Table of Review Queue -->
-    <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+    <!-- Table of Review Queue (RI&E Assessments) -->
+    <div v-if="activeQueueTab === 'assessments'" class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-xs">
           <thead>
@@ -194,7 +316,7 @@ const submitReview = () => {
               <td class="px-5 py-4 text-right">
                 <button
                   @click="startReview(rev)"
-                  class="bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 ml-auto transition-colors"
+                  class="bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 ml-auto transition-colors cursor-pointer"
                 >
                   <Play class="w-3.5 h-3.5 fill-current" />
                   <span>Start Audit</span>
@@ -203,6 +325,68 @@ const submitReview = () => {
             </tr>
             <tr v-if="filteredReviews.length === 0">
               <td colspan="8" class="text-center py-10 text-slate-400 font-medium">No reviews currently in the pending queue.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Table of Substance Review Queue -->
+    <div v-if="activeQueueTab === 'substances'" class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+              <th class="px-5 py-3.5">Substance Name</th>
+              <th class="px-5 py-3.5">Manufacturer</th>
+              <th class="px-5 py-3.5">Storage Location</th>
+              <th class="px-5 py-3.5">SDS Review Due</th>
+              <th class="px-5 py-3.5">RA Review Due</th>
+              <th class="px-5 py-3.5">Trigger Reason</th>
+              <th class="px-5 py-3.5">Status</th>
+              <th class="px-5 py-3.5 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr v-for="item in pendingSubstanceReviews" :key="item.id" class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-4">
+                <button
+                  @click="store.navigateTo('haz-substances-detail', { substanceId: item.id, tab: 'reviews' })"
+                  class="font-bold text-slate-700 hover:text-brand-600 hover:underline transition-colors block text-left"
+                >
+                  {{ item.substanceName }}
+                </button>
+              </td>
+              <td class="px-5 py-4 font-semibold text-slate-500">{{ item.manufacturer }}</td>
+              <td class="px-5 py-4 font-semibold text-slate-600">{{ item.location }}</td>
+              <td class="px-5 py-4 font-semibold text-slate-500">{{ item.sdsNextReview }}</td>
+              <td class="px-5 py-4 font-semibold text-slate-500">{{ item.raNextReview }}</td>
+              <td class="px-5 py-4 text-slate-500 font-semibold max-w-xs truncate" :title="item.reason">{{ item.reason }}</td>
+              <td class="px-5 py-4">
+                <span
+                  class="px-2 py-0.5 rounded-full text-[9px] font-bold border"
+                  :class="[
+                    item.status === 'Overdue' ? 'bg-red-50 text-red-700 border-red-100 animate-pulse' : '',
+                    item.status === 'Due Soon' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : '',
+                    item.status === 'Initial Required' ? 'bg-orange-50 text-orange-700 border-orange-100' : '',
+                    item.status === 'Scheduled' ? 'bg-slate-50 text-slate-500 border-slate-100' : ''
+                  ]"
+                >
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-right">
+                <button
+                  @click="startSubstanceReview(item)"
+                  class="bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 ml-auto transition-colors cursor-pointer"
+                >
+                  <Play class="w-3.5 h-3.5 fill-current" />
+                  <span>Start Audit</span>
+                </button>
+              </td>
+            </tr>
+            <tr v-if="pendingSubstanceReviews.length === 0">
+              <td colspan="8" class="text-center py-10 text-slate-400 font-medium">No substances currently requiring safety review.</td>
             </tr>
           </tbody>
         </table>
@@ -268,8 +452,99 @@ const submitReview = () => {
         </div>
 
         <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
-          <button @click="closeReview" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-white text-xs font-bold transition-all">Cancel</button>
-          <button @click="submitReview" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all">Complete Safety Review</button>
+          <button @click="closeReview" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-white text-xs font-bold transition-all cursor-pointer">Cancel</button>
+          <button @click="submitReview" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer">Complete Safety Review</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Substance Review Modal -->
+    <div v-if="activeSubstanceReview" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col animate-scale-in">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <ClipboardCheck class="w-5 h-5 text-brand-500" />
+            <h4 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider font-sans">Audit Hazardous Substance</h4>
+          </div>
+          <button @click="closeSubstanceReview" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">&times;</button>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <!-- Info Summary -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs text-slate-600 space-y-2">
+            <div class="flex justify-between font-bold">
+              <span>Substance:</span>
+              <span class="text-slate-800">{{ activeSubstanceReview.substanceName }}</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>Location:</span>
+              <span class="text-slate-800">{{ activeSubstanceReview.location }}</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>SDS Next Review:</span>
+              <span class="text-slate-800">{{ activeSubstanceReview.sdsNextReview }}</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>RA Next Review:</span>
+              <span class="text-slate-800">{{ activeSubstanceReview.raNextReview }}</span>
+            </div>
+            <div class="flex justify-between font-medium">
+              <span>Audit Reason:</span>
+              <span class="text-amber-700 font-bold">{{ activeSubstanceReview.reason }}</span>
+            </div>
+          </div>
+
+          <!-- Review Scope -->
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Review Scope / Type *</label>
+            <select
+              v-model="subReviewType"
+              class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 font-semibold text-slate-700 bg-slate-50"
+            >
+              <option value="Full Substance Audit">Full Substance Audit (SDS & Risk Assessment)</option>
+              <option value="SDS Review">SDS Dates & Compliance Review</option>
+              <option value="Risk Assessment Review">Kinney Controls & Risk Evaluation</option>
+            </select>
+          </div>
+
+          <!-- Reviewer Name -->
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Safety Inspector / Auditor *</label>
+            <input
+              v-model="subReviewerName"
+              type="text"
+              class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 font-semibold text-slate-700 bg-slate-50"
+            />
+          </div>
+
+          <!-- Audit Notes -->
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Audit findings & notes *</label>
+            <textarea
+              v-model="subReviewNotes"
+              rows="4"
+              placeholder="Outline storage check findings, package leakages, correct PPE usage, ventilation status..."
+              class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500"
+            ></textarea>
+          </div>
+
+          <!-- Next Review Date -->
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Rescheduled Next Review Date *</label>
+            <input
+              v-model="subReviewNextDate"
+              type="date"
+              class="w-full border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 font-semibold text-slate-700 bg-slate-50"
+            />
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button @click="closeSubstanceReview" class="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-white text-xs font-bold transition-all cursor-pointer">Cancel</button>
+          <button @click="submitSubstanceReview" :disabled="isSubmittingSubReview" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 disabled:bg-slate-300 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer">
+            <span v-if="isSubmittingSubReview">Completing...</span>
+            <span v-else>Complete Substance Review</span>
+          </button>
         </div>
       </div>
     </div>
