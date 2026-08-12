@@ -31,6 +31,18 @@ import RiskMatrixPage from './pages/RiskMatrixPage.vue';
 import Workflow from './pages/Workflow.vue';
 import HazardDetails from './pages/HazardDetails.vue';
 
+// Import TRA Pages
+import TraDashboard from './pages/TraDashboard.vue';
+import NewTra from './pages/NewTra.vue';
+import TraDetails from './pages/TraDetails.vue';
+
+// Import Hazardous Substances Pages
+import HazSubstancesOverview from './pages/HazSubstancesOverview.vue';
+import HazSubstancesRegister from './pages/HazSubstancesRegister.vue';
+import HazSubstancesAddWizard from './pages/HazSubstancesAddWizard.vue';
+import HazSubstancesDetail from './pages/HazSubstancesDetail.vue';
+import HazSubstancesRiskAssessment from './pages/HazSubstancesRiskAssessment.vue';
+
 const activeComponent = computed(() => {
   const page = store.currentPage;
   const params = store.currentParams;
@@ -65,6 +77,18 @@ const activeComponent = computed(() => {
   if (page === 'templates') return Templates;
   if (page === 'risk-matrix') return RiskMatrixPage;
   if (page === 'workflow') return Workflow;
+
+  // TRA pages mapping
+  if (page === 'tra-dashboard') return TraDashboard;
+  if (page === 'new-tra') return NewTra;
+  if (page === 'tra-details') return TraDetails;
+
+  // Hazardous Substances pages mapping
+  if (page === 'haz-substances-overview') return HazSubstancesOverview;
+  if (page === 'haz-substances-register') return HazSubstancesRegister;
+  if (page === 'haz-substances-add') return HazSubstancesAddWizard;
+  if (page === 'haz-substances-detail') return HazSubstancesDetail;
+  if (page === 'haz-substances-assessment') return HazSubstancesRiskAssessment;
 
   return RieOverview;
 });

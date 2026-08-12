@@ -86,6 +86,15 @@ const submitComment = () => {
   store.addActionComment(selectedAction.value.id, newCommentText.value, 'Current Auditor');
   newCommentText.value = '';
 };
+
+const handleHazardNameClick = (item) => {
+  console.log('Clicked action item:', JSON.stringify(item));
+  if (item.traId) {
+    store.navigateTo('tra-details', { traId: item.traId });
+  } else {
+    store.navigateTo('hazards', { hazardId: item.hazardId });
+  }
+};
 </script>
 
 <template>
@@ -124,7 +133,7 @@ const submitComment = () => {
 
         <template #cell-hazardName="{ item }">
           <button
-            @click="store.navigateTo('hazards', { hazardId: item.hazardId })"
+            @click="handleHazardNameClick(item)"
             class="text-slate-500 font-medium hover:text-brand-600 transition-colors text-left block max-w-[150px] truncate"
           >
             {{ item.hazardName }}

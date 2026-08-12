@@ -40,6 +40,11 @@ const assessmentActions = computed(() => {
   return store.actions.filter(act => act.assessmentId === assessment.value.id);
 });
 
+const linkedTras = computed(() => {
+  if (!assessment.value) return [];
+  return store.tras.filter(t => t.sourceRieId === assessment.value.id);
+});
+
 const openActionsCount = computed(() => {
   return assessmentActions.value.filter(a => a.status !== 'Completed').length;
 });
@@ -274,6 +279,13 @@ const submitComment = () => {
         :class="activeTab === 'history' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'"
       >
         Version History ({{ assessment.history?.length || 0 }})
+      </button>
+      <button
+        @click="activeTab = 'tras'"
+        class="px-4 py-2 text-sm font-semibold border-b-2 transition-all duration-150"
+        :class="activeTab === 'tras' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400 hover:text-slate-600'"
+      >
+        Linked TRAs ({{ linkedTras.length }})
       </button>
     </div>
 
@@ -511,6 +523,74 @@ const submitComment = () => {
             <p class="text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">{{ hLog.comment }}</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Tab: Linked TRAs -->
+    <div v-else-if="activeTab === 'tras'" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Associated Task Risk Analyses (TRAs)</h4>
+        <button
+          @click="store.navigateTo('new-tra')"
+          class="text-xs font-bold text-brand-600 bg-brand-50 border border-brand-100 hover:bg-brand-100 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span>Create New TRA</span>
+        </button>
+      </div>
+
+      <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase">
+              <th class="px-5 py-3.5">TRA Task / Title</th>
+              <th class="px-5 py-3.5">Location</th>
+              <th class="px-5 py-3.5 text-center">Steps</th>
+              <th class="px-5 py-3.5 text-center">Status</th>
+              <th class="px-5 py-3.5">Valid Until</th>
+              <th class="px-5 py-3.5 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr
+              v-for="tra in linkedTras"
+              :key="tra.id"
+              class="hover:bg-slate-50 transition-colors cursor-pointer"
+              @click="store.navigateTo('tra-details', { traId: tra.id })"
+            >
+              <td class="px-5 py-4">
+                <span class="block font-bold text-slate-800 text-sm leading-snug">{{ tra.title }}</span>
+                <span class="block text-[10px] text-slate-400 mt-1 truncate max-w-xs">{{ tra.description }}</span>
+              </td>
+              <td class="px-5 py-4 font-semibold text-slate-500">{{ tra.location }}</td>
+              <td class="px-5 py-4 text-center font-semibold text-slate-700">{{ tra.steps.length }}</td>
+              <td class="px-5 py-4">
+                <span
+                  class="px-2 py-0.5 rounded-full text-[9px] font-bold border"
+                  :class="[
+                    tra.status === 'Approved' ? 'bg-success-50 text-success-700 border-success-100' : 'bg-slate-50 text-slate-500 border-slate-100',
+                  ]"
+                >
+                  {{ tra.status }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-slate-500 font-medium">{{ tra.validUntil || '—' }}</td>
+              <td class="px-5 py-4 text-right">
+                <button
+                  class="text-brand-600 font-bold hover:underline"
+                  @click.stop="store.navigateTo('tra-details', { traId: tra.id })"
+                >
+                  Open TRA →
+                </button>
+              </td>
+            </tr>
+            <tr v-if="linkedTras.length === 0">
+              <td colspan="6" class="text-center py-8 text-slate-400 italic">
+                No TRAs have been linked to this RI&E assessment.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
