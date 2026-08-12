@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { store } from '../store';
 import {
   FileText,
@@ -32,20 +32,17 @@ const form = ref({
 });
 
 // Step 2 Form Data (SDS & GHS)
-const isSdsUploaded = ref(false);
-const isSdsSkipped = ref(false);
-const isUploading = ref(false);
 const sdsData = ref({
-  fileName: '',
-  version: '1.0',
+  fileName: 'Manual Record',
+  version: '',
   issueDate: '',
   revisionDate: '',
   nextReviewDate: '',
-  status: 'Missing'
+  status: 'Current'
 });
 const hazards = ref({
   pictograms: [],
-  signalWord: 'Danger',
+  signalWord: '',
   statements: '',
   classes: ''
 });
@@ -70,53 +67,6 @@ const ppeRequirements = ref([
 ]);
 const basicControlsText = ref('Use in ventilated area. Avoid skin contact. Keep away from ignition sources.');
 
-// Simulate Upload SDS
-const triggerSdsUpload = () => {
-  isUploading.value = true;
-  isSdsSkipped.value = false;
-  
-  setTimeout(() => {
-    isUploading.value = false;
-    isSdsUploaded.value = true;
-    sdsData.value = {
-      fileName: 'Bitumen-Primer-SDS.pdf',
-      version: '4.0',
-      issueDate: '2026-08-01',
-      revisionDate: '2026-08-10',
-      nextReviewDate: '2027-08-10',
-      status: 'Current'
-    };
-    // Prefill hazards classification from Soprema SDS
-    hazards.value = {
-      pictograms: ['GHS02', 'GHS07', 'GHS09'],
-      signalWord: 'Danger',
-      statements: 'H226, H315, H336',
-      classes: 'Flammable, Skin irritation, Environmental hazard'
-    };
-    store.addToast('SDS Uploaded! Fields populated from Bitumen-Primer-SDS.pdf.', 'success');
-  }, 900);
-};
-
-const skipSds = () => {
-  isSdsSkipped.value = true;
-  isSdsUploaded.value = false;
-  sdsData.value = {
-    fileName: '',
-    version: '',
-    issueDate: '',
-    revisionDate: '',
-    nextReviewDate: '',
-    status: 'Missing'
-  };
-  hazards.value = {
-    pictograms: [],
-    signalWord: '',
-    statements: '',
-    classes: ''
-  };
-  store.addToast('SDS Skipped. Upload will be required for full approval.', 'warning');
-};
-
 const selectPictogram = (pic) => {
   if (hazards.value.pictograms.includes(pic)) {
     hazards.value.pictograms = hazards.value.pictograms.filter(p => p !== pic);
@@ -134,8 +84,8 @@ const nextStep = () => {
     }
   }
   if (currentStep.value === 2) {
-    if (!isSdsUploaded.value && !isSdsSkipped.value) {
-      store.addToast('Please upload the SDS sheet or skip for now', 'error');
+    if (!sdsData.value.version || !sdsData.value.revisionDate || !sdsData.value.nextReviewDate) {
+      store.addToast('Please fill in required SDS details (Version, Revision Date, Next Review)', 'error');
       return;
     }
   }
@@ -169,12 +119,12 @@ const saveSubstance = () => {
     unit: form.value.unit,
     usedFor: form.value.usedFor,
     sds: {
-      fileName: sdsData.value.fileName,
+      fileName: 'Manual Record',
       version: sdsData.value.version,
       issueDate: sdsData.value.issueDate,
       revisionDate: sdsData.value.revisionDate,
       nextReviewDate: sdsData.value.nextReviewDate,
-      status: isSdsSkipped.value ? 'Missing' : sdsData.value.status,
+      status: 'Current',
       history: []
     },
     hazards: {
@@ -201,19 +151,64 @@ const saveSubstance = () => {
   };
 
   const newSub = store.addSubstance(substanceData);
-  
-  // Navigate straight to Risk Assessment for this newly created substance
   store.navigateTo('haz-substances-assessment', { substanceId: newSub.id });
+};
+
+// GHS H-Code Library Search and Selector Logic
+const showHCodeLibraryModal = ref(false);
+const searchHQuery = ref('');
+const tempSelectedHCodes = ref([]);
+
+const openHCodeLibrary = () => {
+  const currentCodes = hazards.value.statements
+    ? hazards.value.statements.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
+    : [];
+  tempSelectedHCodes.value = [...currentCodes];
+  searchHQuery.value = '';
+  showHCodeLibraryModal.value = true;
+};
+
+const filteredHCodesList = computed(() => {
+  const query = searchHQuery.value.trim().toLowerCase();
+  if (!query) return store.standardHCodes;
+  return store.standardHCodes.filter(item => 
+    item.code.toLowerCase().includes(query) || 
+    item.label.toLowerCase().includes(query) ||
+    item.type.toLowerCase().includes(query)
+  );
+});
+
+const toggleTempHCodeSelection = (code) => {
+  if (tempSelectedHCodes.value.includes(code)) {
+    tempSelectedHCodes.value = tempSelectedHCodes.value.filter(c => c !== code);
+  } else {
+    tempSelectedHCodes.value.push(code);
+  }
+};
+
+const applyHCodeSelection = () => {
+  hazards.value.statements = tempSelectedHCodes.value.join(', ');
+  // Auto-fill Hazard Classes if blank
+  const matchedTypes = tempSelectedHCodes.value.map(code => {
+    const item = store.standardHCodes.find(h => h.code === code);
+    return item ? `${item.type} hazard` : '';
+  }).filter((v, i, self) => v && self.indexOf(v) === i);
+  
+  if (matchedTypes.length > 0 && !hazards.value.classes) {
+    hazards.value.classes = matchedTypes.join(', ');
+  }
+  showHCodeLibraryModal.value = false;
+  store.addToast('GHS H-Codes applied successfully.', 'success');
 };
 
 // GHS symbols helpers
 const pictogramsList = [
-  { id: 'GHS02', char: '🔥', name: 'GHS02 Flammable' },
-  { id: 'GHS05', char: '🧪', name: 'GHS05 Corrosive' },
-  { id: 'GHS06', char: '☠️', name: 'GHS06 Toxic' },
-  { id: 'GHS07', char: '⚠️', name: 'GHS07 Irritant' },
-  { id: 'GHS08', char: '👤', name: 'GHS08 Health' },
-  { id: 'GHS09', char: '🌿', name: 'GHS09 Environment' }
+  { id: 'GHS02', char: '🔥', name: 'GHS02 — Flammable', desc: 'Flammable liquids, gases, aerosols, solids, pyrophorics' },
+  { id: 'GHS05', char: '🧪', name: 'GHS05 — Corrosive', desc: 'Skin corrosion/burns, serious eye damage, metal corrosion' },
+  { id: 'GHS06', char: '☠️', name: 'GHS06 — Toxic', desc: 'Acute toxicity (fatal or severe danger if inhaled/swallowed)' },
+  { id: 'GHS07', char: '⚠️', name: 'GHS07 — Harmful / Irritant', desc: 'Skin/eye irritation, skin sensitizer, acute toxicity, narcotic effects' },
+  { id: 'GHS08', char: '👤', name: 'GHS08 — Health Hazard', desc: 'Carcinogenicity, respiratory sensitizer, reproductive toxicity, organ toxicity' },
+  { id: 'GHS09', char: '🌿', name: 'GHS09 — Environmental', desc: 'Acute or chronic hazards to the aquatic environment' }
 ];
 </script>
 
@@ -400,86 +395,83 @@ const pictogramsList = [
       <div v-if="currentStep === 2" class="space-y-6">
         <div class="border-b border-slate-50 pb-3">
           <h3 class="text-base font-extrabold text-slate-800">Safety Data Sheet (SDS) & Hazards</h3>
-          <p class="text-xs text-slate-400">Upload the supplier's Safety Data Sheet to automatically parse GHS hazard criteria.</p>
+          <p class="text-xs text-slate-400">Specify the manufacturer SDS parameters and chemical hazards manually.</p>
         </div>
 
-        <div class="bg-slate-50 p-6 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
-          <Upload class="w-8 h-8 text-slate-400 mb-3" />
-          <p class="text-xs font-semibold text-slate-600 mb-1">Upload the latest Safety Data Sheet provided by the manufacturer or supplier.</p>
-          <p class="text-[10px] text-slate-400 mb-4">Supports PDF files up to 10MB</p>
-          
-          <div class="flex flex-wrap gap-2.5 justify-center">
-            <button
-              type="button"
-              @click="triggerSdsUpload"
-              :disabled="isUploading"
-              class="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
-            >
-              <span v-if="isUploading">Parsing SDS...</span>
-              <span v-else>Upload SDS PDF</span>
-            </button>
-            <button
-              type="button"
-              @click="skipSds"
-              class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
-            >
-              Skip for now
-            </button>
+        <!-- SDS Form details (Always visible, manually filled) -->
+        <div class="space-y-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+          <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+            <span class="text-xs font-extrabold text-slate-800">Supplier Safety Data Sheet Dates</span>
+            <span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 text-[9px] font-extrabold rounded-full uppercase">
+              Manual Entry
+            </span>
           </div>
-        </div>
 
-        <!-- SDS upload status -->
-        <div v-if="isSdsUploaded" class="bg-success-50/50 border border-success-100 p-4 rounded-xl flex items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <CheckCircle2 class="w-5 h-5 text-success" />
-            <div>
-              <h5 class="text-xs font-bold text-slate-700">{{ sdsData.fileName }}</h5>
-              <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">
-                Version: {{ sdsData.version }} | Issue Date: {{ sdsData.issueDate }} | Rev Date: {{ sdsData.revisionDate }}
-              </span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+            <div class="flex flex-col">
+              <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">SDS Version *</label>
+              <input
+                v-model="sdsData.version"
+                type="text"
+                placeholder="e.g. 4.0"
+                class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold text-slate-700 focus:outline-hidden focus:border-brand-500 transition-colors"
+              />
             </div>
-          </div>
-          <span class="px-2 py-0.5 bg-success-100 border border-success-200 text-success-800 text-[9px] font-extrabold rounded-full">
-            🟢 Current
-          </span>
-        </div>
-
-        <!-- SDS Warning prompt -->
-        <div v-if="isSdsSkipped" class="bg-red-50 border border-red-100 p-4 rounded-xl flex items-start gap-3">
-          <AlertTriangle class="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-          <div>
-            <h5 class="text-xs font-bold text-red-800">SDS Skip Warning</h5>
-            <p class="text-[10px] text-red-600 font-medium mt-0.5 leading-relaxed">
-              SDS is required before the substance can be fully approved. Substance status will remain draft or restricted.
-            </p>
+            <div class="flex flex-col">
+              <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Issue Date</label>
+              <input
+                v-model="sdsData.issueDate"
+                type="date"
+                class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold text-slate-700 focus:outline-hidden focus:border-brand-500 transition-colors"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Revision Date *</label>
+              <input
+                v-model="sdsData.revisionDate"
+                type="date"
+                class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold text-slate-700 focus:outline-hidden focus:border-brand-500 transition-colors"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Next Review *</label>
+              <input
+                v-model="sdsData.nextReviewDate"
+                type="date"
+                class="bg-white border border-slate-200 rounded-lg p-2 text-xs font-semibold text-slate-700 focus:outline-hidden focus:border-brand-500 transition-colors"
+              />
+            </div>
           </div>
         </div>
 
         <!-- Hazard Information (GHS) Section -->
-        <div v-if="isSdsUploaded || isSdsSkipped" class="space-y-4 border-t border-slate-50 pt-4">
+        <div class="space-y-4 border-t border-slate-50 pt-4">
           <div>
             <h4 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider">GHS / Hazard Information</h4>
             <p class="text-[10px] text-slate-400 mt-0.5">Please confirm or enter the classification details from the SDS sheets.</p>
           </div>
 
-          <!-- Hazard pictograms checkboxes -->
+          <!-- Hazard pictograms checkboxes with chemical descriptions -->
           <div class="flex flex-col">
-            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Hazard Pictograms</label>
-            <div class="flex flex-wrap gap-2">
+            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">Hazard Pictograms (Confirm from SDS Label)</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               <button
                 v-for="pic in pictogramsList"
                 :key="pic.id"
                 type="button"
                 @click="selectPictogram(pic.id)"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all"
+                class="flex items-start text-left gap-3 p-3 rounded-xl border text-xs transition-all cursor-pointer"
                 :class="[
                   hazards.pictograms.includes(pic.id)
-                    ? 'bg-orange-50 border-orange-200 text-orange-800'
-                    : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                    ? 'bg-orange-50/75 border-orange-200 text-orange-950 shadow-xs'
+                    : 'bg-slate-50/50 border-slate-200 text-slate-600 hover:bg-slate-50'
                 ]"
               >
-                <span class="text-sm">{{ pic.char }}</span>
-                <span class="text-[10px] font-semibold">{{ pic.id }}</span>
+                <span class="text-xl p-1 bg-white rounded-lg border border-slate-100 shadow-xs shrink-0 select-none">{{ pic.char }}</span>
+                <div>
+                  <span class="font-extrabold block text-[11px]">{{ pic.name }}</span>
+                  <span class="text-[9px] text-slate-400 font-semibold leading-relaxed mt-0.5 block">{{ pic.desc }}</span>
+                </div>
               </button>
             </div>
           </div>
@@ -502,20 +494,31 @@ const pictogramsList = [
             <div class="flex flex-col justify-end">
               <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-center">
                 <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Source:</span>
-                <span class="text-[10px] font-bold text-slate-600 ml-1.5">Supplier SDS</span>
+                <span class="text-[10px] font-bold text-slate-600 ml-1.5">Supplier SDS Label</span>
               </div>
             </div>
 
             <!-- Hazard statements -->
             <div class="flex flex-col">
-              <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Hazard Statements (H-codes)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Hazard Statements (H-codes) *</label>
+                <button
+                  type="button"
+                  @click="openHCodeLibrary"
+                  class="text-[9px] font-extrabold text-brand-600 hover:text-brand-800 transition-colors uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                >
+                  🔍 Browse H-Code Library
+                </button>
+              </div>
               <input
                 v-model="hazards.statements"
                 type="text"
                 placeholder="e.g. H226, H315, H336"
                 class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
               />
-              <span class="text-[9px] text-slate-400 mt-1 block">Comma-separated H-codes</span>
+              <span class="text-[9px] text-slate-400 mt-1.5 block leading-normal">
+                💡 Standardized GHS warning codes found in <strong>Section 2 (Hazards Identification)</strong> of your product's supplier SDS sheet (e.g. H226, H315).
+              </span>
             </div>
 
             <!-- Hazard classes -->
@@ -659,6 +662,95 @@ const pictogramsList = [
         <CheckCircle2 class="w-4 h-4" />
         <span>Save & Create Risk Assessment</span>
       </button>
+    </div>
+
+    <!-- GHS H-CODE LIBRARY MODAL -->
+    <div v-if="showHCodeLibraryModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-4 animate-scale-in flex flex-col max-h-[85vh]">
+        <div class="flex items-center justify-between border-b border-slate-50 pb-3 shrink-0">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <span>GHS Hazard Statements (H-Codes) Library</span>
+            </h3>
+            <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Select warning codes to append to the product record.</p>
+          </div>
+          <button @click="showHCodeLibraryModal = false" class="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer">
+            Close
+          </button>
+        </div>
+
+        <!-- Search bar -->
+        <div class="relative shrink-0">
+          <input
+            v-model="searchHQuery"
+            type="text"
+            placeholder="Search codes or terms (e.g. flammable, toxicity, H315)..."
+            class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl pl-3 pr-10 py-2 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+          />
+        </div>
+
+        <!-- H-Code list -->
+        <div class="flex-1 overflow-y-auto min-h-0 space-y-2 pr-1">
+          <div
+            v-for="item in filteredHCodesList"
+            :key="item.code"
+            @click="toggleTempHCodeSelection(item.code)"
+            class="flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer text-xs font-semibold"
+            :class="[
+              tempSelectedHCodes.includes(item.code)
+                ? 'bg-brand-50/50 border-brand-200 text-brand-950 shadow-xs'
+                : 'bg-slate-50/50 border-slate-200 text-slate-600 hover:bg-slate-50'
+            ]"
+          >
+            <input
+              type="checkbox"
+              :checked="tempSelectedHCodes.includes(item.code)"
+              class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4 mt-0.5"
+              @click.stop="toggleTempHCodeSelection(item.code)"
+            />
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-slate-800">{{ item.code }}</span>
+                <span
+                  class="px-1.5 py-0.2 bg-white border text-[8px] font-bold rounded uppercase tracking-wider"
+                  :class="[
+                    item.type === 'Physical' ? 'text-red-700 border-red-100 bg-red-50/30' : '',
+                    item.type === 'Health' ? 'text-amber-700 border-amber-100 bg-amber-50/30' : '',
+                    item.type === 'Environmental' ? 'text-emerald-700 border-emerald-100 bg-emerald-50/30' : ''
+                  ]"
+                >
+                  {{ item.type }}
+                </span>
+              </div>
+              <p class="text-[10px] text-slate-400 block mt-1 leading-normal font-semibold">{{ item.label }}</p>
+            </div>
+          </div>
+          <div v-if="filteredHCodesList.length === 0" class="py-12 text-center text-slate-400 italic text-xs">
+            No hazard codes match your search query.
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex items-center justify-between border-t border-slate-50 pt-3 shrink-0">
+          <span class="text-[10px] font-bold text-slate-400">
+            Selected: <span class="text-brand-600 font-extrabold">{{ tempSelectedHCodes.length }} codes</span>
+          </span>
+          <div class="flex items-center gap-2">
+            <button
+              @click="showHCodeLibraryModal = false"
+              class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-3 py-2 rounded-xl transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              @click="applyHCodeSelection"
+              class="bg-brand-600 hover:bg-brand-700 text-white text-[10px] font-bold px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
+            >
+              Confirm & Add
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

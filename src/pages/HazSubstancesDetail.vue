@@ -35,37 +35,38 @@ onMounted(() => {
   }
 });
 
-// SDS Replace Modal State
-const showReplaceSdsModal = ref(false);
-const newSdsVersion = ref('');
-const newSdsFile = ref('Bitumen-Primer-SDS-v5.pdf');
+// SDS Edit Modal State
+const showEditSdsModal = ref(false);
+const editSdsVersion = ref('');
+const editSdsIssueDate = ref('');
+const editSdsRevisionDate = ref('');
+const editSdsNextReviewDate = ref('');
 const hazardsChanged = ref(false);
-const isUploading = ref(false);
+const isSavingSds = ref(false);
 
-const openReplaceModal = () => {
-  newSdsVersion.value = substance.value ? (parseFloat(substance.value.sds.version) + 1.0).toFixed(1) : '1.0';
-  newSdsFile.value = substance.value ? `${substance.value.name.replace(/\s+/g, '-')}-SDS-v${newSdsVersion.value}.pdf` : 'new-sds.pdf';
+const openEditSdsModal = () => {
+  if (substance.value) {
+    editSdsVersion.value = substance.value.sds.version;
+    editSdsIssueDate.value = substance.value.sds.issueDate;
+    editSdsRevisionDate.value = substance.value.sds.revisionDate;
+    editSdsNextReviewDate.value = substance.value.sds.nextReviewDate;
+  }
   hazardsChanged.value = false;
-  showReplaceSdsModal.value = true;
+  showEditSdsModal.value = true;
 };
 
-const handleReplaceSds = () => {
-  isUploading.value = true;
+const handleSaveSdsDetails = () => {
+  isSavingSds.value = true;
   setTimeout(() => {
-    isUploading.value = false;
-    showReplaceSdsModal.value = false;
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const reviewDate = new Date();
-    reviewDate.setFullYear(reviewDate.getFullYear() + 1);
-    const reviewStr = reviewDate.toISOString().split('T')[0];
+    isSavingSds.value = false;
+    showEditSdsModal.value = false;
 
     const sdsUpdate = {
-      fileName: newSdsFile.value,
-      version: newSdsVersion.value,
-      issueDate: todayStr,
-      revisionDate: todayStr,
-      nextReviewDate: reviewStr
+      fileName: 'Manual Record',
+      version: editSdsVersion.value,
+      issueDate: editSdsIssueDate.value,
+      revisionDate: editSdsRevisionDate.value,
+      nextReviewDate: editSdsNextReviewDate.value
     };
 
     // If hazards changed, simulate GHS09 (Environmental Hazard) addition
@@ -83,7 +84,7 @@ const handleReplaceSds = () => {
     }
 
     store.uploadNewSds(substance.value.id, sdsUpdate, hazardsChanged.value);
-  }, 1000);
+  }, 600);
 };
 
 // Archive flow
@@ -104,6 +105,18 @@ const getGhsDetails = (pic) => {
     GHS09: { char: '🌿', label: 'Environmental Hazard', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' }
   };
   return mapping[pic] || { char: '❓', label: pic, color: 'bg-slate-50 text-slate-600 border-slate-100' };
+};
+
+const getGhsExplanation = (pic) => {
+  const explanations = {
+    GHS02: 'Flammable: Indicates flammable liquids, gases, aerosols, solids, self-reactive substances, pyrophoric liquids/solids, and self-heating substances that pose fire risks.',
+    GHS05: 'Corrosive: Indicates chemicals that can cause severe skin burns, serious eye damage, and metal corrosion upon exposure.',
+    GHS06: 'Toxic: Indicates acute toxicity; indicates chemicals that can cause severe toxicity, fatal poisoning, or critical harm if swallowed, inhaled, or absorbed through the skin.',
+    GHS07: 'Harmful / Irritant: Indicates skin, eye, or respiratory irritation, skin sensitizing effects, narcotic effects (causing drowsiness/dizziness), and lower acute toxic risk.',
+    GHS08: 'Health Hazard: Indicates potential carcinogenicity, respiratory sensitizer, reproductive toxicity, mutagenicity, aspiration danger, and target organ toxicity over chronic exposure.',
+    GHS09: 'Environmental Hazard: Indicates acute or long-term hazards to the aquatic environment (fish, algae, crustacea, and ecosystems).'
+  };
+  return explanations[pic] || 'No description available.';
 };
 
 // SDS Status simulation buttons
@@ -300,50 +313,80 @@ const setSdsStatus = (status) => {
             <div v-if="!substance.hazards.statements?.length" class="text-xs text-slate-400 italic col-span-3">No codes specified</div>
           </div>
         </div>
+
+        <!-- GHS Meanings detailed explanation -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Classification Meaning / Explanations</h4>
+          <div class="space-y-2.5">
+            <div
+              v-for="pic in substance.hazards.pictograms"
+              :key="`explain-${pic}`"
+              class="flex items-start gap-3 p-4 rounded-xl border border-slate-100 bg-slate-50/50"
+            >
+              <span class="text-xl p-1.5 bg-white rounded-lg border border-slate-150 shadow-xs shrink-0 select-none">
+                {{ getGhsDetails(pic).char }}
+              </span>
+              <div>
+                <h5 class="text-xs font-extrabold text-slate-800">{{ pic }} — {{ getGhsDetails(pic).label }}</h5>
+                <p class="text-[10px] text-slate-400 font-semibold leading-relaxed mt-0.5">
+                  {{ getGhsExplanation(pic) }}
+                </p>
+              </div>
+            </div>
+            <div v-if="substance.hazards.pictograms.length === 0" class="text-xs text-slate-400 italic">
+              No classifications available.
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- SDS TAB -->
       <div v-if="activeTab === 'sds'" class="space-y-6">
         <div class="border-b border-slate-50 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Supplier Safety Data Sheet</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">Supplier SDS sheets must be reviewed annually to maintain regulatory compliance.</p>
+            <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Safety Data Sheet Details</h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">Supplier SDS version and revision dates registered in the database.</p>
           </div>
           <button
-            @click="openReplaceModal"
-            class="inline-flex items-center gap-1 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition-colors cursor-pointer"
+            @click="openEditSdsModal"
+            class="inline-flex items-center gap-1 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition-colors cursor-pointer"
           >
-            <Upload class="w-3.5 h-3.5" />
-            <span>Replace SDS</span>
+            <Edit2 class="w-3.5 h-3.5" />
+            <span>Edit SDS Dates</span>
           </button>
         </div>
 
         <!-- Current SDS details -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <!-- File details -->
-          <div class="md:col-span-2 bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex items-start gap-4 justify-between">
-            <div class="flex items-start gap-3">
-              <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shrink-0">
+          <!-- Manual Record Details -->
+          <div class="md:col-span-2 bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100 shrink-0">
                 <FileText class="w-5.5 h-5.5" />
               </div>
-              <div>
-                <h4 class="text-sm font-black text-slate-800">{{ substance.sds.fileName || 'No SDS Uploaded' }}</h4>
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold text-slate-400 mt-1 uppercase">
-                  <span>Version: {{ substance.sds.version || 'N/A' }}</span>
-                  <span>•</span>
-                  <span>Revision: {{ substance.sds.revisionDate || 'N/A' }}</span>
-                </div>
+              <div class="space-y-1">
+                <h4 class="text-xs font-black text-slate-400 uppercase tracking-wider">Active SDS Record</h4>
+                <span class="text-sm font-extrabold text-slate-800 block">Manual Date Registration Logged</span>
+                <p class="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                  Hazard classifications and dates have been verified manually against the manufacturer's sheet.
+                </p>
               </div>
             </div>
-            
-            <button
-              v-if="substance.sds.fileName"
-              class="inline-flex items-center gap-1 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-[10px] font-extrabold px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-xs"
-              @click="store.addToast('Opening SDS document viewer...', 'info')"
-            >
-              <Eye class="w-3.5 h-3.5" />
-              <span>View SDS</span>
-            </button>
+
+            <div class="grid grid-cols-3 gap-4 border-t border-slate-100 pt-3 text-[11px] font-bold text-slate-600">
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider block font-semibold">SDS Version</span>
+                <span class="text-slate-800 block mt-0.5">{{ substance.sds.version || 'N/A' }}</span>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider block font-semibold">Issue Date</span>
+                <span class="text-slate-800 block mt-0.5">{{ substance.sds.issueDate || '—' }}</span>
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider block font-semibold">Revision Date</span>
+                <span class="text-slate-800 block mt-0.5">{{ substance.sds.revisionDate || '—' }}</span>
+              </div>
+            </div>
           </div>
 
           <!-- Status badge -->
@@ -534,34 +577,50 @@ const setSdsStatus = (status) => {
 
     </div>
 
-    <!-- REPLACE SDS MODAL -->
-    <div v-if="showReplaceSdsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <!-- EDIT SDS DETAILS MODAL -->
+    <div v-if="showEditSdsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-6 space-y-5 animate-scale-in">
         <div class="flex items-center justify-between border-b border-slate-50 pb-3">
-          <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Upload New SDS Version</h3>
-          <button @click="showReplaceSdsModal = false" class="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer">
+          <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Edit SDS Details</h3>
+          <button @click="showEditSdsModal = false" class="text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer">
             Close
           </button>
         </div>
 
         <div class="space-y-4">
-          <!-- File selection -->
-          <div class="flex flex-col">
-            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">New Version Code</label>
-            <input
-              v-model="newSdsVersion"
-              type="text"
-              class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
-            />
-          </div>
-
-          <div class="flex flex-col">
-            <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">SDS PDF Document Name</label>
-            <input
-              v-model="newSdsFile"
-              type="text"
-              class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
-            />
+          <div class="grid grid-cols-2 gap-3.5">
+            <div class="flex flex-col">
+              <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">SDS Version *</label>
+              <input
+                v-model="editSdsVersion"
+                type="text"
+                class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Issue Date</label>
+              <input
+                v-model="editSdsIssueDate"
+                type="date"
+                class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Revision Date *</label>
+              <input
+                v-model="editSdsRevisionDate"
+                type="date"
+                class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Next Review *</label>
+              <input
+                v-model="editSdsNextReviewDate"
+                type="date"
+                class="bg-slate-50 border border-slate-200 focus:bg-white focus:border-brand-500 rounded-xl p-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden transition-colors"
+              />
+            </div>
           </div>
 
           <!-- Hazards changed checkbox -->
@@ -582,18 +641,18 @@ const setSdsStatus = (status) => {
 
         <div class="flex items-center justify-end gap-2.5 pt-2">
           <button
-            @click="showReplaceSdsModal = false"
+            @click="showEditSdsModal = false"
             class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
-            @click="handleReplaceSds"
-            :disabled="isUploading"
+            @click="handleSaveSdsDetails"
+            :disabled="isSavingSds"
             class="bg-brand-600 hover:bg-brand-700 disabled:bg-slate-300 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors cursor-pointer"
           >
-            <span v-if="isUploading">Uploading...</span>
-            <span v-else>Confirm & Upload</span>
+            <span v-if="isSavingSds">Saving...</span>
+            <span v-else>Save Changes</span>
           </button>
         </div>
       </div>
