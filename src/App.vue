@@ -43,6 +43,10 @@ import HazSubstancesAddWizard from './pages/HazSubstancesAddWizard.vue';
 import HazSubstancesDetail from './pages/HazSubstancesDetail.vue';
 import HazSubstancesRiskAssessment from './pages/HazSubstancesRiskAssessment.vue';
 
+// Import Training & Certificates Pages
+import TrainingOverview from './pages/TrainingOverview.vue';
+import EmployeeCertificates from './pages/EmployeeCertificates.vue';
+
 const activeComponent = computed(() => {
   const page = store.currentPage;
   const params = store.currentParams;
@@ -89,6 +93,10 @@ const activeComponent = computed(() => {
   if (page === 'haz-substances-add') return HazSubstancesAddWizard;
   if (page === 'haz-substances-detail') return HazSubstancesDetail;
   if (page === 'haz-substances-assessment') return HazSubstancesRiskAssessment;
+
+  // Training & Certificates pages mapping
+  if (page === 'training-overview') return TrainingOverview;
+  if (page === 'employee-certificates') return EmployeeCertificates;
 
   return RieOverview;
 });

@@ -3,6 +3,12 @@ import { generateMockData, calculateKinneyScore, getKinneyRiskLevel } from './mo
 
 const rawData = generateMockData();
 
+const relativeDate = (daysOffset) => {
+  const d = new Date();
+  d.setDate(d.getDate() + daysOffset);
+  return d.toISOString().split('T')[0];
+};
+
 export const store = reactive({
   // Simplified Routing State (Exactly the 6 pages)
   currentPage: 'overview',
@@ -49,7 +55,68 @@ export const store = reactive({
     { code: 'H411', type: 'Environmental', label: 'Toxic to aquatic life with long lasting effects' },
     { code: 'H412', type: 'Environmental', label: 'Harmful to aquatic life with long lasting effects' }
   ],
-  projects: rawData.projects,
+  projects: rawData.projects.map(p => {
+    if (p.id === 2) p.name = "Test project 1";
+    if (p.id === 3) p.name = "Warehouse fit-out";
+    if (p.id === 5) p.name = "A12 viaduct";
+    return p;
+  }),
+  employees: [
+    { id: 1, name: 'Tom Willemsen', role: 'Machinist', company: 'Hijs & Transport BV', projectIds: [1, 2] },
+    { id: 2, name: 'Sven Bakker', role: 'Voorman', company: 'Loggix Bouw', projectIds: [2] },
+    { id: 3, name: 'Karim El Idrissi', role: 'Elektromonteur', company: 'Elektro Peters', projectIds: [2] },
+    { id: 4, name: 'Jeroen Lutmers', role: 'Projectleader', company: 'Loggix Bouw', projectIds: [2] },
+    { id: 5, name: 'Bram Koster', role: 'Sloper', company: 'Van Dijk Infra', projectIds: [2] },
+    { id: 6, name: 'Ria Smit', role: 'Dakdekker', company: 'Dakwerken Jansen BV', projectIds: [2] },
+    { id: 7, name: 'Pieter de Jong', role: 'Timmerman', company: 'Loggix Bouw', projectIds: [2, 5] },
+    { id: 8, name: 'Jan de Vries', role: 'Lasser', company: 'SteelWorks BV', projectIds: [2] },
+    { id: 9, name: 'Arthur King', role: 'Elektricien', company: 'ElectroTech', projectIds: [2, 3] },
+    { id: 10, name: 'Sophie Dubois', role: 'Veiligheidskundige', company: 'HSE Consultant', projectIds: [3] },
+    { id: 11, name: 'Marc Dubois', role: 'Steigerbouwer', company: 'Scaffolding NL', projectIds: [1, 5] }
+  ],
+  certificateTypes: [
+    { id: 'bhv', name: 'BHV Bedrijfshulpverlening (BHV)', validityMonths: 12, satisfies: null },
+    { id: 'vca-vol', name: 'VCA-VOL VCA VOL (leidinggevenden)', validityMonths: 120, satisfies: 'vca-b' },
+    { id: 'vca-b', name: 'VCA-B VCA Basisveiligheid', validityMonths: 120, satisfies: null },
+    { id: 'nen3140', name: 'NEN3140 NEN 3140 (VOP)', validityMonths: 36, satisfies: null },
+    { id: 'heights', name: 'Safe Working at Heights', validityMonths: 24, satisfies: null },
+    { id: 'forklift', name: 'Forklift Operator Certificate', validityMonths: 60, satisfies: null }
+  ],
+  certificates: [
+    { id: 1, employeeId: 1, typeId: 'bhv', certificateNumber: 'BHV-2291', issuer: 'HSE NL', issuedOn: relativeDate(-65 - 365), expiresOn: relativeDate(-65), status: 'Expired', history: [] },
+    { id: 2, employeeId: 2, typeId: 'bhv', certificateNumber: 'BHV-1982', issuer: 'Safety First', issuedOn: relativeDate(-40 - 365), expiresOn: relativeDate(-40), status: 'Expired', history: [] },
+    { id: 3, employeeId: 3, typeId: 'nen3140', certificateNumber: 'NEN-1092', issuer: 'Electro Tech', issuedOn: relativeDate(36 - 1095), expiresOn: relativeDate(36), status: 'Expiring', history: [] },
+    { id: 4, employeeId: 4, typeId: 'bhv', certificateNumber: 'BHV-77410', issuer: 'Loggix Training', issuedOn: relativeDate(47 - 365), expiresOn: relativeDate(47), status: 'Expiring', history: [] },
+    { id: 5, employeeId: 5, typeId: 'vca-b', certificateNumber: 'VB-1298', issuer: 'VCA NL', issuedOn: relativeDate(57 - 3650), expiresOn: relativeDate(57), status: 'Expiring', history: [] },
+    { id: 6, employeeId: 6, typeId: 'bhv', certificateNumber: 'BHV-2009', issuer: 'Safety Training BV', issuedOn: relativeDate(69 - 365), expiresOn: relativeDate(69), status: 'Expiring', history: [] },
+    { id: 7, employeeId: 1, typeId: 'forklift', certificateNumber: 'FL-8812', issuer: 'Transport Safety', issuedOn: relativeDate(-300), expiresOn: relativeDate(-300 + 1800), status: 'Valid', history: [] },
+    { id: 8, employeeId: 2, typeId: 'vca-b', certificateNumber: 'VB-8291', issuer: 'VCA NL', issuedOn: relativeDate(-500), expiresOn: relativeDate(-500 + 3650), status: 'Valid', history: [] },
+    { id: 9, employeeId: 3, typeId: 'vca-b', certificateNumber: 'VB-7711', issuer: 'VCA NL', issuedOn: relativeDate(-200), expiresOn: relativeDate(-200 + 3650), status: 'Valid', history: [] },
+    { id: 10, employeeId: 4, typeId: 'vca-vol', certificateNumber: 'VV-100231', issuer: 'VCA Infra', issuedOn: relativeDate(-2200), expiresOn: relativeDate(-2200 + 3650), status: 'Valid', history: [] },
+    { id: 11, employeeId: 5, typeId: 'heights', certificateNumber: 'WH-9082', issuer: 'Fall Safety NL', issuedOn: relativeDate(-150), expiresOn: relativeDate(-150 + 730), status: 'Valid', history: [] },
+    { id: 12, employeeId: 7, typeId: 'vca-b', certificateNumber: 'VB-4311', issuer: 'VCA NL', issuedOn: relativeDate(-400), expiresOn: relativeDate(-400 + 3650), status: 'Valid', history: [] },
+    { id: 13, employeeId: 7, typeId: 'heights', certificateNumber: 'WH-3091', issuer: 'Fall Safety NL', issuedOn: relativeDate(-250), expiresOn: relativeDate(-250 + 730), status: 'Valid', history: [] },
+    { id: 14, employeeId: 7, typeId: 'bhv', certificateNumber: 'BHV-5511', issuer: 'Safety Training BV', issuedOn: relativeDate(-180), expiresOn: relativeDate(-180 + 365), status: 'Valid', history: [] },
+    { id: 15, employeeId: 8, typeId: 'vca-b', certificateNumber: 'VB-3891', issuer: 'VCA NL', issuedOn: relativeDate(-300), expiresOn: relativeDate(-300 + 3650), status: 'Valid', history: [] },
+    { id: 16, employeeId: 8, typeId: 'nen3140', certificateNumber: 'NEN-9021', issuer: 'Electro Tech', issuedOn: relativeDate(-200), expiresOn: relativeDate(-200 + 1095), status: 'Valid', history: [] },
+    { id: 17, employeeId: 8, typeId: 'bhv', certificateNumber: 'BHV-6622', issuer: 'Safety Training BV', issuedOn: relativeDate(-120), expiresOn: relativeDate(-120 + 365), status: 'Valid', history: [] },
+    { id: 18, employeeId: 9, typeId: 'vca-b', certificateNumber: 'VB-5522', issuer: 'VCA NL', issuedOn: relativeDate(-150), expiresOn: relativeDate(-150 + 3650), status: 'Valid', history: [] },
+    { id: 19, employeeId: 9, typeId: 'nen3140', certificateNumber: 'NEN-8812', issuer: 'Electro Tech', issuedOn: relativeDate(-100), expiresOn: relativeDate(-100 + 1095), status: 'Valid', history: [] },
+    { id: 20, employeeId: 9, typeId: 'bhv', certificateNumber: 'BHV-7733', issuer: 'Safety Training BV', issuedOn: relativeDate(-80), expiresOn: relativeDate(-80 + 365), status: 'Valid', history: [] },
+    { id: 21, employeeId: 10, typeId: 'vca-vol', certificateNumber: 'VV-99002', issuer: 'VCA Infra', issuedOn: relativeDate(-600), expiresOn: relativeDate(-600 + 3650), status: 'Valid', history: [] },
+    { id: 22, employeeId: 10, typeId: 'bhv', certificateNumber: 'BHV-8822', issuer: 'Safety Training BV', issuedOn: relativeDate(-300), expiresOn: relativeDate(-300 + 365), status: 'Valid', history: [] },
+    { id: 23, employeeId: 10, typeId: 'heights', certificateNumber: 'WH-4422', issuer: 'Fall Safety NL', issuedOn: relativeDate(-200), expiresOn: relativeDate(-200 + 730), status: 'Valid', history: [] },
+    { id: 24, employeeId: 11, typeId: 'vca-b', certificateNumber: 'VB-6611', issuer: 'VCA NL', issuedOn: relativeDate(-500), expiresOn: relativeDate(-500 + 3650), status: 'Valid', history: [] },
+    { id: 25, employeeId: 11, typeId: 'heights', certificateNumber: 'WH-5511', issuer: 'Fall Safety NL', issuedOn: relativeDate(-100), expiresOn: relativeDate(-100 + 730), status: 'Valid', history: [] },
+    { id: 26, employeeId: 11, typeId: 'bhv', certificateNumber: 'BHV-9944', issuer: 'Safety Training BV', issuedOn: relativeDate(-50), expiresOn: relativeDate(-50 + 365), status: 'Valid', history: [] },
+    { id: 27, employeeId: 6, typeId: 'vca-b', certificateNumber: 'VB-9988', issuer: 'VCA NL', issuedOn: relativeDate(-450), expiresOn: relativeDate(-450 + 3650), status: 'Valid', history: [] }
+  ],
+  projectRequirements: {
+    1: ['vca-b', 'heights'],
+    2: ['vca-b', 'bhv'],
+    3: ['vca-b'],
+    5: ['vca-b']
+  },
   assessments: rawData.assessments,
   hazards: rawData.hazards,
   actions: [
@@ -755,7 +822,6 @@ export const store = reactive({
   syncRouteFromHash() {
     const hash = window.location.hash || '#/overview';
     const page = hash.replace(/^#\//, '') || 'overview';
-    // Fallback if not valid page
     const validPages = [
       'overview', 'dashboard', 'projects', 'assessments', 'hazards', 
       'project-list', 'new-assessment', 'review', 'compare', 'guide',
@@ -763,7 +829,8 @@ export const store = reactive({
       'archive', 'settings', 'reports', 'templates', 'risk-matrix', 'workflow',
       'tra-dashboard', 'new-tra', 'tra-details',
       'haz-substances-overview', 'haz-substances-register', 'haz-substances-add', 
-      'haz-substances-detail', 'haz-substances-assessment'
+      'haz-substances-detail', 'haz-substances-assessment',
+      'training-overview', 'employee-certificates'
     ];
     this.currentPage = validPages.includes(page) ? page : 'overview';
 
@@ -1489,6 +1556,164 @@ export const store = reactive({
     } else {
       this.addToast(`Assessment "${rev.assessmentName}" review signed off.`, 'success');
     }
+  },
+
+  // --- TRAINING & CERTIFICATE ACTIONS ---
+  updateCertificateStatus(cert) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const expiry = new Date(cert.expiresOn);
+    expiry.setHours(0,0,0,0);
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      cert.status = 'Expired';
+    } else if (diffDays <= 90) {
+      cert.status = 'Expiring';
+    } else {
+      cert.status = 'Valid';
+    }
+    return cert.status;
+  },
+
+  addCertificate(employeeId, certData) {
+    const typeId = certData.typeId;
+    let validityMonths = 12;
+    if (typeId === 'custom') {
+      validityMonths = parseInt(certData.customValidityMonths, 10) || 12;
+    } else {
+      const type = this.certificateTypes.find(t => t.id === typeId);
+      if (type) validityMonths = type.validityMonths;
+    }
+
+    const issued = new Date(certData.issuedOn);
+    const expires = new Date(issued);
+    expires.setMonth(expires.getMonth() + validityMonths);
+    const expiresOn = expires.toISOString().split('T')[0];
+
+    const newId = this.certificates.length > 0 ? Math.max(...this.certificates.map(c => c.id)) + 1 : 1;
+    
+    const newCert = {
+      id: newId,
+      employeeId: parseInt(employeeId, 10),
+      typeId: typeId === 'custom' ? 'custom' : typeId,
+      customName: typeId === 'custom' ? certData.customName : null,
+      certificateNumber: certData.certificateNumber,
+      issuer: certData.issuer,
+      issuedOn: certData.issuedOn,
+      expiresOn: expiresOn,
+      status: 'Valid',
+      history: []
+    };
+
+    this.updateCertificateStatus(newCert);
+    this.certificates.push(newCert);
+
+    const emp = this.employees.find(e => e.id === parseInt(employeeId, 10));
+    const certName = typeId === 'custom' ? certData.customName : this.certificateTypes.find(t => t.id === typeId)?.name;
+    this.addToast(`Certificate "${certName}" assigned to ${emp?.name || 'employee'}.`, 'success');
+  },
+
+  renewCertificate(certId, renewData) {
+    const cert = this.certificates.find(c => c.id === parseInt(certId, 10));
+    if (!cert) return;
+
+    if (!cert.history) cert.history = [];
+    cert.history.push({
+      certificateNumber: cert.certificateNumber,
+      issuer: cert.issuer,
+      issuedOn: cert.issuedOn,
+      expiresOn: cert.expiresOn,
+      renewedAt: new Date().toISOString().split('T')[0]
+    });
+
+    cert.certificateNumber = renewData.certificateNumber;
+    cert.issuer = renewData.issuer;
+    cert.issuedOn = renewData.issuedOn;
+
+    let validityMonths = 12;
+    if (cert.typeId === 'custom') {
+      validityMonths = parseInt(renewData.customValidityMonths, 10) || 12;
+      if (renewData.customName) cert.customName = renewData.customName;
+    } else {
+      const type = this.certificateTypes.find(t => t.id === cert.typeId);
+      if (type) validityMonths = type.validityMonths;
+    }
+
+    const issued = new Date(renewData.issuedOn);
+    const expires = new Date(issued);
+    expires.setMonth(expires.getMonth() + validityMonths);
+    cert.expiresOn = expires.toISOString().split('T')[0];
+
+    this.updateCertificateStatus(cert);
+
+    const emp = this.employees.find(e => e.id === cert.employeeId);
+    const certName = cert.typeId === 'custom' ? cert.customName : this.certificateTypes.find(t => t.id === cert.typeId)?.name;
+    this.addToast(`Certificate "${certName}" renewed for ${emp?.name || 'employee'}.`, 'success');
+  },
+
+  deleteCertificate(certId) {
+    const certIndex = this.certificates.findIndex(c => c.id === parseInt(certId, 10));
+    if (certIndex === -1) return;
+
+    const cert = this.certificates[certIndex];
+    const certName = cert.typeId === 'custom' ? cert.customName : this.certificateTypes.find(t => t.id === cert.typeId)?.name;
+    
+    this.certificates.splice(certIndex, 1);
+    this.addToast(`Certificate "${certName}" has been removed.`, 'warning');
+  },
+
+  getProjectCompliance(projectId) {
+    const projId = parseInt(projectId, 10);
+    const workers = this.employees.filter(e => e.projectIds.includes(projId));
+    if (workers.length === 0) return { workersCount: 0, gaps: 0, percentage: 100 };
+
+    const requirements = this.projectRequirements[projId] || ['vca-b'];
+    let totalRequirements = workers.length * requirements.length;
+    let gaps = 0;
+
+    workers.forEach(w => {
+      const wCerts = this.certificates.filter(c => c.employeeId === w.id);
+      
+      requirements.forEach(req => {
+        const hasCert = wCerts.some(c => {
+          const status = this.updateCertificateStatus(c);
+          if (status === 'Expired') return false;
+
+          if (c.typeId === req) return true;
+
+          const certType = this.certificateTypes.find(t => t.id === c.typeId);
+          if (certType && certType.satisfies === req) return true;
+
+          return false;
+        });
+
+        if (!hasCert) {
+          gaps++;
+        }
+      });
+    });
+
+    const percentage = totalRequirements > 0 ? Math.round(((totalRequirements - gaps) / totalRequirements) * 100) : 100;
+    return {
+      workersCount: workers.length,
+      gaps,
+      percentage
+    };
+  },
+
+  addEmployee(empData) {
+    const newId = this.employees.length > 0 ? Math.max(...this.employees.map(e => e.id)) + 1 : 1;
+    const newEmp = {
+      id: newId,
+      name: empData.name,
+      role: empData.role,
+      company: empData.company,
+      projectIds: empData.projectIds || []
+    };
+    this.employees.push(newEmp);
+    this.addToast(`Employee "${empData.name}" has been added successfully.`, 'success');
   }
 });
 

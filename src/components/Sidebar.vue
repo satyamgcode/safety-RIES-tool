@@ -12,7 +12,8 @@ import {
   HelpCircle,
   ClipboardCheck,
   Flame,
-  Beaker
+  Beaker,
+  Award
 } from 'lucide-vue-next';
 
 // Exact tabs matching the Miro/Whimsical process layout + Guide + TRAs
@@ -24,6 +25,7 @@ const navItems = [
   { name: 'Start Review', page: 'review', icon: RefreshCw },
   { name: 'Compare Versions', page: 'compare', icon: GitCompare },
   { name: 'Task Safety (TRA)', page: 'tra-dashboard', icon: ClipboardCheck },
+  { name: 'Training & Certs', page: 'training-overview', icon: Award },
   { name: 'Workflow Guide', page: 'guide', icon: HelpCircle }
 ];
 
@@ -60,7 +62,7 @@ const activePage = computed(() => {
           @click.prevent="store.navigateTo(item.page)"
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200"
           :class="[
-            activePage === item.page
+            activePage === item.page || (item.page === 'training-overview' && activePage === 'employee-certificates')
               ? 'bg-brand-50 text-brand-600 shadow-sm shadow-brand-500/5 font-semibold'
               : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
           ]"
@@ -68,7 +70,7 @@ const activePage = computed(() => {
           <component
             :is="item.icon"
             class="w-4.5 h-4.5 transition-transform duration-200"
-            :class="activePage === item.page ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'"
+            :class="activePage === item.page || (item.page === 'training-overview' && activePage === 'employee-certificates') ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'"
           />
           <span class="flex-1">{{ item.name }}</span>
         </a>
