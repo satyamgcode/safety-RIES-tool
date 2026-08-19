@@ -830,7 +830,7 @@ export const store = reactive({
       'tra-dashboard', 'new-tra', 'tra-details',
       'haz-substances-overview', 'haz-substances-register', 'haz-substances-add', 
       'haz-substances-detail', 'haz-substances-assessment',
-      'training-overview', 'employee-certificates'
+      'training-overview', 'employee-certificates', 'image-to-base64'
     ];
     this.currentPage = validPages.includes(page) ? page : 'overview';
 

@@ -13,7 +13,8 @@ import {
   ClipboardCheck,
   Flame,
   Beaker,
-  Award
+  Award,
+  FileImage
 } from 'lucide-vue-next';
 
 // Exact tabs matching the Miro/Whimsical process layout + Guide + TRAs
@@ -107,6 +108,35 @@ const activePage = computed(() => {
                     (item.page === 'haz-substances-overview' && activePage === 'haz-substances-assessment') ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'"
           />
           <span class="flex-1">{{ item.name }}</span>
+        </a>
+      </div>
+
+      <!-- Divider -->
+      <div class="my-4 border-t border-slate-100"></div>
+
+      <!-- Utilities Heading -->
+      <div class="px-3.5 mb-2 flex items-center gap-1.5 text-slate-400">
+        <FileImage class="w-3.5 h-3.5 text-brand-500" />
+        <span class="text-[10px] font-extrabold tracking-wider uppercase">Utilities</span>
+      </div>
+
+      <!-- Utilities Links -->
+      <div>
+        <a
+          href="#"
+          @click.prevent="store.navigateTo('image-to-base64')"
+          class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200"
+          :class="[
+            activePage === 'image-to-base64'
+              ? 'bg-brand-50 text-brand-600 shadow-sm shadow-brand-500/5 font-semibold'
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+          ]"
+        >
+          <FileImage
+            class="w-4.5 h-4.5 transition-transform duration-200"
+            :class="activePage === 'image-to-base64' ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'"
+          />
+          <span class="flex-1">Image to Base64</span>
         </a>
       </div>
     </nav>
