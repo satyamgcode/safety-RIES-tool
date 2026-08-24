@@ -158,6 +158,14 @@ const formatDatePretty = (dateStr) => {
 watch(employeeId, () => {
   resetForm();
 });
+
+const employeePermits = computed(() => {
+  return (store.permits || []).filter(p => p.holderId === employeeId.value);
+});
+
+const unassignedPermits = computed(() => {
+  return (store.permits || []).filter(p => p.holderId !== employeeId.value && p.status !== 'Closed');
+});
 </script>
 
 <template>
@@ -312,6 +320,80 @@ watch(employeeId, () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Work Permits Panel -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <FileCheck class="w-5 h-5 text-brand-600" />
+              <h3 class="text-sm font-bold text-slate-700">Assigned Work Permits</h3>
+            </div>
+            <span class="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">
+              {{ employeePermits.length }}
+            </span>
+          </div>
+
+          <!-- Quick Assign Selector -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+            <label class="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wide">Assign Existing Permit to {{ employee.name }}</label>
+            <div class="flex gap-2">
+              <select
+                @change="e => { if (e.target.value) { store.assignPermit(parseInt(e.target.value, 10), employeeId); e.target.value = ''; } }"
+                class="flex-1 text-xs font-semibold px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500 cursor-pointer"
+              >
+                <option value="">-- Select an existing permit to assign --</option>
+                <option v-for="p in unassignedPermits" :key="p.id" :value="p.id">
+                  {{ p.permitNumber }} - {{ p.title }} ({{ p.type }})
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Permits Table -->
+          <div class="overflow-x-auto" v-if="employeePermits.length > 0">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50/75 border-b border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  <th class="px-4 py-2">Permit</th>
+                  <th class="px-4 py-2">Type</th>
+                  <th class="px-4 py-2">Project</th>
+                  <th class="px-4 py-2">Status</th>
+                  <th class="px-4 py-2 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="p in employeePermits" :key="p.id" class="text-xs hover:bg-slate-50/30 transition-all">
+                  <td class="px-4 py-3 font-bold text-slate-800">{{ p.permitNumber }}</td>
+                  <td class="px-4 py-3 text-slate-600 font-semibold">{{ p.type }}</td>
+                  <td class="px-4 py-3 text-slate-600 font-bold truncate max-w-[120px]">{{ p.projectName }}</td>
+                  <td class="px-4 py-3">
+                    <span 
+                      class="px-2 py-0.5 rounded-full text-[9px] font-bold inline-block border"
+                      :class="[
+                        p.status === 'Active' ? 'text-success-700 bg-success-50 border-success-100 font-bold' : '',
+                        p.status === 'Closed' ? 'text-slate-500 bg-slate-50 border-slate-200' : '',
+                        p.status === 'Awaiting Approval' ? 'text-orange-700 bg-orange-50 border-orange-100' : ''
+                      ]"
+                    >
+                      {{ p.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <button 
+                      @click="store.navigateTo('permit-details', { permitId: p.id })"
+                      class="text-xs font-bold text-brand-600 hover:text-brand-800 transition-colors"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="text-center py-4 text-xs font-semibold text-slate-400 italic bg-slate-50/20 rounded-xl border border-dashed border-slate-100">
+            No work permits currently assigned to this worker.
           </div>
         </div>
       </div>

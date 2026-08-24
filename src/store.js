@@ -56,6 +56,7 @@ export const store = reactive({
     { code: 'H412', type: 'Environmental', label: 'Harmful to aquatic life with long lasting effects' }
   ],
   projects: rawData.projects.map(p => {
+    if (p.id === 1) p.name = "Shantanu Test Thursday";
     if (p.id === 2) p.name = "Test project 1";
     if (p.id === 3) p.name = "Warehouse fit-out";
     if (p.id === 5) p.name = "A12 viaduct";
@@ -68,11 +69,13 @@ export const store = reactive({
     { id: 4, name: 'Jeroen Lutmers', role: 'Projectleader', company: 'Loggix Bouw', projectIds: [2] },
     { id: 5, name: 'Bram Koster', role: 'Sloper', company: 'Van Dijk Infra', projectIds: [2] },
     { id: 6, name: 'Ria Smit', role: 'Dakdekker', company: 'Dakwerken Jansen BV', projectIds: [2] },
-    { id: 7, name: 'Pieter de Jong', role: 'Timmerman', company: 'Loggix Bouw', projectIds: [2, 5] },
+    { id: 7, name: 'Pieter de Jong', role: 'Timmerman', company: 'Loggix Bouw', projectIds: [1, 2, 5] },
     { id: 8, name: 'Jan de Vries', role: 'Lasser', company: 'SteelWorks BV', projectIds: [2] },
     { id: 9, name: 'Arthur King', role: 'Elektricien', company: 'ElectroTech', projectIds: [2, 3] },
     { id: 10, name: 'Sophie Dubois', role: 'Veiligheidskundige', company: 'HSE Consultant', projectIds: [3] },
-    { id: 11, name: 'Marc Dubois', role: 'Steigerbouwer', company: 'Scaffolding NL', projectIds: [1, 5] }
+    { id: 11, name: 'Marc Dubois', role: 'Steigerbouwer', company: 'Scaffolding NL', projectIds: [1, 5] },
+    { id: 12, name: 'M. de Vries', role: 'Mechanical Supervisor', company: 'Loggix Bouw', projectIds: [1, 2] },
+    { id: 13, name: 'L. Hofman', role: 'HSE Coordinator', company: 'Apex Industrial Holdings', projectIds: [1, 2] }
   ],
   certificateTypes: [
     { id: 'bhv', name: 'BHV Bedrijfshulpverlening (BHV)', validityMonths: 12, satisfies: null },
@@ -109,7 +112,9 @@ export const store = reactive({
     { id: 24, employeeId: 11, typeId: 'vca-b', certificateNumber: 'VB-6611', issuer: 'VCA NL', issuedOn: relativeDate(-500), expiresOn: relativeDate(-500 + 3650), status: 'Valid', history: [] },
     { id: 25, employeeId: 11, typeId: 'heights', certificateNumber: 'WH-5511', issuer: 'Fall Safety NL', issuedOn: relativeDate(-100), expiresOn: relativeDate(-100 + 730), status: 'Valid', history: [] },
     { id: 26, employeeId: 11, typeId: 'bhv', certificateNumber: 'BHV-9944', issuer: 'Safety Training BV', issuedOn: relativeDate(-50), expiresOn: relativeDate(-50 + 365), status: 'Valid', history: [] },
-    { id: 27, employeeId: 6, typeId: 'vca-b', certificateNumber: 'VB-9988', issuer: 'VCA NL', issuedOn: relativeDate(-450), expiresOn: relativeDate(-450 + 3650), status: 'Valid', history: [] }
+    { id: 27, employeeId: 6, typeId: 'vca-b', certificateNumber: 'VB-9988', issuer: 'VCA NL', issuedOn: relativeDate(-450), expiresOn: relativeDate(-450 + 3650), status: 'Valid', history: [] },
+    { id: 28, employeeId: 12, typeId: 'vca-b', certificateNumber: 'VB-8899', issuer: 'VCA NL', issuedOn: relativeDate(-100), expiresOn: relativeDate(-100 + 3650), status: 'Valid', history: [] },
+    { id: 29, employeeId: 12, typeId: 'heights', certificateNumber: 'WH-1211', issuer: 'Fall Safety NL', issuedOn: relativeDate(-750), expiresOn: relativeDate(-750 + 730), status: 'Expired', history: [] }
   ],
   projectRequirements: {
     1: ['vca-b', 'heights'],
@@ -163,6 +168,155 @@ export const store = reactive({
   reviews: rawData.reviews,
   templates: rawData.templates,
   archive: rawData.archive,
+  permits: [
+    {
+      id: 1,
+      permitNumber: 'PTW-0001',
+      type: 'Hot Work',
+      title: 'test bhushan',
+      location: 'kharadi',
+      projectId: 1,
+      projectName: 'Shantanu Test Thursday',
+      requestedBy: 'M. de Vries',
+      holderId: 12,
+      holderName: 'M. de Vries',
+      approvedBy: 'L. Hofman',
+      validFrom: '2026-08-13',
+      validTo: '2026-08-13',
+      status: 'Closed',
+      requiredCertificateIds: ['vca-b'],
+      precautions: [
+        { id: 1, description: 'Fire extinguisher on site', confirmed: false },
+        { id: 2, description: 'Gas checks done', confirmed: false }
+      ],
+      timeline: [
+        { status: 'Active', timestamp: '2026-08-13 13:14:39', by: 'M. de Vries' },
+        { status: 'Closed', timestamp: '2026-08-13 13:24:35', by: 'Shantanu' }
+      ]
+    },
+    {
+      id: 2,
+      permitNumber: 'PTW-0002',
+      type: 'Hot Work',
+      title: 'test bhushan title',
+      location: 'kharadi',
+      projectId: 1,
+      projectName: 'Shantanu Test Thursday',
+      requestedBy: 'M. de Vries',
+      holderId: 12,
+      holderName: 'M. de Vries',
+      approvedBy: 'L. Hofman',
+      validFrom: '2026-08-13',
+      validTo: '2026-08-13',
+      status: 'Closed',
+      requiredCertificateIds: ['vca-b'],
+      precautions: [
+        { id: 1, description: 'test 2', confirmed: true },
+        { id: 2, description: 'test 3', confirmed: false }
+      ],
+      timeline: [
+        { status: 'Active', timestamp: '2026-08-13 13:14:39', by: 'M. de Vries' },
+        { status: 'Closed', timestamp: '2026-08-13 13:24:35', by: 'Shantanu' }
+      ]
+    },
+    {
+      id: 3,
+      permitNumber: 'PTW-0003',
+      type: 'Confined Space',
+      title: 'test 3 for steps checked',
+      location: 'pune',
+      projectId: 1,
+      projectName: 'Shantanu Test Thursday',
+      requestedBy: 'M. de Vries',
+      holderId: 12,
+      holderName: 'M. de Vries',
+      approvedBy: 'L. Hofman',
+      validFrom: '2026-07-31',
+      validTo: '2026-08-20',
+      status: 'Closed',
+      requiredCertificateIds: ['vca-b', 'bhv'],
+      precautions: [
+        { id: 1, description: 'test precaution A', confirmed: true },
+        { id: 2, description: 'test precaution B', confirmed: true }
+      ],
+      timeline: [
+        { status: 'Active', timestamp: '2026-07-31 09:00:00', by: 'M. de Vries' },
+        { status: 'Closed', timestamp: '2026-08-20 17:00:00', by: 'Shantanu' }
+      ]
+    },
+    {
+      id: 4,
+      permitNumber: 'PTW-0004',
+      type: 'Electrical',
+      title: 'testing for the loggs',
+      location: 'netherlands',
+      projectId: 1,
+      projectName: 'Shantanu Test Thursday',
+      requestedBy: 'M. de Vries',
+      holderId: 12,
+      holderName: 'M. de Vries',
+      approvedBy: 'L. Hofman',
+      validFrom: '2026-08-08',
+      validTo: '2026-08-11',
+      status: 'Closed',
+      requiredCertificateIds: ['vca-b', 'nen3140'],
+      precautions: [
+        { id: 1, description: 'Circuit locked and tagged', confirmed: true },
+        { id: 2, description: 'Voltage checked', confirmed: true }
+      ],
+      timeline: [
+        { status: 'Active', timestamp: '2026-08-08 08:30:00', by: 'M. de Vries' },
+        { status: 'Closed', timestamp: '2026-08-11 16:30:00', by: 'Shantanu' }
+      ]
+    },
+    {
+      id: 5,
+      permitNumber: 'PTW-0005',
+      type: 'working with electrical currents',
+      title: 'testing the input',
+      location: 'pune kharadi',
+      projectId: 1,
+      projectName: 'Shantanu Test Thursday',
+      requestedBy: 'M. de Vries',
+      holderId: null,
+      holderName: 'Unassigned',
+      approvedBy: 'L. Hofman',
+      validFrom: '2026-08-13',
+      validTo: '2026-08-20',
+      status: 'Closed',
+      requiredCertificateIds: ['vca-b'],
+      precautions: [
+        { id: 1, description: 'Insulated tools checked', confirmed: false }
+      ],
+      timeline: [
+        { status: 'Active', timestamp: '2026-08-13 10:00:00', by: 'M. de Vries' },
+        { status: 'Closed', timestamp: '2026-08-20 12:00:00', by: 'Shantanu' }
+      ]
+    },
+    {
+      id: 6,
+      permitNumber: 'PTW-0006',
+      type: 'sdsa',
+      title: 'sdsa',
+      location: 'asdsa',
+      projectId: 1,
+      projectName: 'Shantanu Test Thursday',
+      requestedBy: 'M. de Vries',
+      holderId: 7,
+      holderName: 'Pieter de Jong',
+      approvedBy: 'L. Hofman',
+      validFrom: '2026-08-21',
+      validTo: '2026-08-21',
+      status: 'Active',
+      requiredCertificateIds: ['vca-b'],
+      precautions: [
+        { id: 1, description: 'precaution 1', confirmed: false }
+      ],
+      timeline: [
+        { status: 'Active', timestamp: '2026-08-21 08:00:00', by: 'Pieter de Jong' }
+      ]
+    }
+  ],
   tras: [
     {
       id: 1,
@@ -830,7 +984,8 @@ export const store = reactive({
       'tra-dashboard', 'new-tra', 'tra-details',
       'haz-substances-overview', 'haz-substances-register', 'haz-substances-add', 
       'haz-substances-detail', 'haz-substances-assessment',
-      'training-overview', 'employee-certificates', 'image-to-base64'
+      'training-overview', 'employee-certificates', 'image-to-base64',
+      'permits-dashboard', 'permit-details'
     ];
     this.currentPage = validPages.includes(page) ? page : 'overview';
 
@@ -1714,8 +1869,196 @@ export const store = reactive({
     };
     this.employees.push(newEmp);
     this.addToast(`Employee "${empData.name}" has been added successfully.`, 'success');
+  },
+
+  addPermit(permitData) {
+    const nextId = this.permits.length > 0 ? Math.max(...this.permits.map(p => p.id)) + 1 : 1;
+    const permitNumber = `PTW-${String(nextId).padStart(4, '0')}`;
+    
+    // Find project name
+    const project = this.projects.find(p => p.id === parseInt(permitData.projectId, 10));
+    const projName = project ? project.name : 'Unknown Project';
+
+    // Find holder name
+    const employee = permitData.holderId ? this.employees.find(e => e.id === parseInt(permitData.holderId, 10)) : null;
+    const empName = employee ? employee.name : 'Unassigned';
+
+    const newPermit = {
+      id: nextId,
+      permitNumber,
+      type: permitData.type,
+      title: permitData.title,
+      location: permitData.location || '',
+      projectId: parseInt(permitData.projectId, 10),
+      projectName: projName,
+      requestedBy: permitData.requestedBy,
+      holderId: employee ? employee.id : null,
+      holderName: empName,
+      approvedBy: permitData.approvedBy || '',
+      validFrom: permitData.validFrom,
+      validTo: permitData.validTo,
+      status: 'Awaiting Approval',
+      requiredCertificateIds: permitData.requiredCertificateIds || [],
+      precautions: (permitData.precautions || []).map((p, idx) => ({
+        id: idx + 1,
+        description: p.description || p,
+        confirmed: false
+      })),
+      timeline: [
+        { 
+          status: 'Created', 
+          timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19), 
+          by: permitData.requestedBy 
+        }
+      ]
+    };
+
+    this.permits.push(newPermit);
+    this.addToast(`Work Permit "${newPermit.title}" created. Awaiting approval.`, 'success');
+    this.navigateTo('permits-dashboard');
+    return newPermit;
+  },
+
+  togglePrecaution(permitId, precautionId) {
+    const permit = this.permits.find(p => p.id === parseInt(permitId, 10));
+    if (!permit) return;
+    const precaution = permit.precautions.find(p => p.id === parseInt(precautionId, 10));
+    if (precaution) {
+      precaution.confirmed = !precaution.confirmed;
+    }
+  },
+
+  approvePermit(permitId, approvedBy) {
+    const permit = this.permits.find(p => p.id === parseInt(permitId, 10));
+    if (!permit) return;
+    permit.status = 'Active';
+    permit.approvedBy = approvedBy || 'L. Hofman';
+    if (!permit.timeline) permit.timeline = [];
+    permit.timeline.unshift({
+      status: 'Active',
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      by: approvedBy || 'L. Hofman'
+    });
+    this.addToast(`Work Permit "${permit.title}" has been approved and is now Active.`, 'success');
+  },
+
+  closePermit(permitId, closedBy) {
+    const permit = this.permits.find(p => p.id === parseInt(permitId, 10));
+    if (!permit) return;
+    permit.status = 'Closed';
+    if (!permit.timeline) permit.timeline = [];
+    permit.timeline.unshift({
+      status: 'Closed',
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      by: closedBy || 'Shantanu'
+    });
+    this.addToast(`Work Permit "${permit.title}" has been closed.`, 'warning');
+  },
+
+  assignPermit(permitId, employeeId) {
+    const permit = this.permits.find(p => p.id === parseInt(permitId, 10));
+    if (!permit) return;
+    
+    if (employeeId === 'null' || !employeeId) {
+      const oldHolder = permit.holderName;
+      permit.holderId = null;
+      permit.holderName = 'Unassigned';
+      permit.assignedEmployeeIds = [];
+      if (!permit.timeline) permit.timeline = [];
+      permit.timeline.unshift({
+        status: 'Reassigned',
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        by: 'System'
+      });
+      this.addToast(`Work Permit is now Unassigned.`, 'info');
+      return;
+    }
+
+    const employee = this.employees.find(e => e.id === parseInt(employeeId, 10));
+    if (!employee) return;
+    
+    const oldHolder = permit.holderName;
+    permit.holderId = employee.id;
+    permit.holderName = employee.name;
+    permit.assignedEmployeeIds = [employee.id];
+
+    if (!permit.timeline) permit.timeline = [];
+    permit.timeline.unshift({
+      status: 'Reassigned',
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      by: 'System'
+    });
+
+    this.addToast(`Work Permit reassigned to ${employee.name}.`, 'success');
+  },
+
+  assignEmployeeToPermit(permitId, employeeId) {
+    const permit = this.permits.find(p => p.id === parseInt(permitId, 10));
+    if (!permit) return;
+    if (!permit.assignedEmployeeIds) permit.assignedEmployeeIds = [];
+    
+    const empId = parseInt(employeeId, 10);
+    if (permit.assignedEmployeeIds.includes(empId)) return;
+    
+    const employee = this.employees.find(e => e.id === empId);
+    if (!employee) return;
+    
+    permit.assignedEmployeeIds.push(empId);
+    
+    // Update legacy single holder for backward compatibility
+    permit.holderId = empId;
+    permit.holderName = employee.name;
+
+    if (!permit.timeline) permit.timeline = [];
+    permit.timeline.unshift({
+      status: 'Worker Assigned',
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      by: 'System'
+    });
+
+    this.addToast(`${employee.name} assigned to work permit.`, 'success');
+  },
+
+  removeEmployeeFromPermit(permitId, employeeId) {
+    const permit = this.permits.find(p => p.id === parseInt(permitId, 10));
+    if (!permit) return;
+    if (!permit.assignedEmployeeIds) permit.assignedEmployeeIds = [];
+    
+    const empId = parseInt(employeeId, 10);
+    permit.assignedEmployeeIds = permit.assignedEmployeeIds.filter(id => id !== empId);
+    
+    const employee = this.employees.find(e => e.id === empId);
+    const name = employee ? employee.name : 'Worker';
+
+    // Update legacy single holder for backward compatibility
+    if (permit.assignedEmployeeIds.length > 0) {
+      const nextEmp = this.employees.find(e => e.id === permit.assignedEmployeeIds[0]);
+      permit.holderId = nextEmp ? nextEmp.id : null;
+      permit.holderName = nextEmp ? nextEmp.name : 'Unassigned';
+    } else {
+      permit.holderId = null;
+      permit.holderName = 'Unassigned';
+    }
+
+    if (!permit.timeline) permit.timeline = [];
+    permit.timeline.unshift({
+      status: 'Worker Removed',
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      by: 'System'
+    });
+
+    this.addToast(`${name} removed from permit.`, 'warning');
   }
 });
+
+// Initialize assignedEmployeeIds for mock permits
+if (store.permits) {
+  store.permits.forEach(p => {
+    if (!p.assignedEmployeeIds) {
+      p.assignedEmployeeIds = p.holderId ? [p.holderId] : [];
+    }
+  });
+}
 
 // Hash sync listener
 if (typeof window !== 'undefined') {

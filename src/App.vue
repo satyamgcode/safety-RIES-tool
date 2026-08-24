@@ -47,6 +47,10 @@ import HazSubstancesRiskAssessment from './pages/HazSubstancesRiskAssessment.vue
 import TrainingOverview from './pages/TrainingOverview.vue';
 import EmployeeCertificates from './pages/EmployeeCertificates.vue';
 
+// Import Work Permit Pages
+import PermitsDashboard from './pages/PermitsDashboard.vue';
+import PermitDetails from './pages/PermitDetails.vue';
+
 // Import AWS Image to Base64 Converter Page
 import ImageBase64Converter from './pages/ImageBase64Converter.vue';
 
@@ -100,6 +104,10 @@ const activeComponent = computed(() => {
   // Training & Certificates pages mapping
   if (page === 'training-overview') return TrainingOverview;
   if (page === 'employee-certificates') return EmployeeCertificates;
+
+  // Work Permit pages mapping
+  if (page === 'permits-dashboard') return PermitsDashboard;
+  if (page === 'permit-details') return PermitDetails;
 
   // Utility tools mapping
   if (page === 'image-to-base64') return ImageBase64Converter;
