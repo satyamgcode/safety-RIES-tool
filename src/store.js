@@ -558,13 +558,44 @@ export const store = reactive({
     { id: 9, name: 'Manitou MT 625 Telehandler', tag: 'TH-01', type: 'Material Handling', projectId: 5, operator: 'Pieter de Jong', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-10-22', location: 'Pylon 3 West' }
   ],
   inspections: [
-    { id: 1, inspectionNumber: 'INSP-2026-001', type: 'Weekly Site Safety Walk', description: 'Perimeter fencing, scaffolding toe-boards & edge protection review', projectId: 1, inspector: 'Sophie Dubois', scheduledDate: '2026-09-22', status: 'Scheduled', findingsCount: 2, passedChecks: 18 },
-    { id: 2, inspectionNumber: 'INSP-2026-002', type: 'Electrical & LOTO Isolation', description: 'Temporary distribution boards and earth-leakage breakers verification', projectId: 1, inspector: 'Amir Patel', scheduledDate: '2026-09-18', status: 'Completed', findingsCount: 1, passedChecks: 14 },
-    { id: 3, inspectionNumber: 'INSP-2026-003', type: 'PPE & Fall Arrest Audit', description: 'Verification of harness test stamps and anchor line tensioning', projectId: 1, inspector: 'L. Hofman', scheduledDate: '2026-09-15', status: 'Completed', findingsCount: 0, passedChecks: 16 },
-    { id: 4, inspectionNumber: 'INSP-2026-004', type: 'Chemical & HazMat Storage', description: 'Flammables locker ventilation, spill kits and SDS accessibility', projectId: 1, inspector: 'Sophie Dubois', scheduledDate: '2026-09-25', status: 'Scheduled', findingsCount: 0, passedChecks: 12 },
-    { id: 5, inspectionNumber: 'INSP-2026-005', type: 'Indoor Air & Dust Extraction', description: 'Aerosol concentration check during ceiling drywall demolition', projectId: 2, inspector: 'Markus Vance', scheduledDate: '2026-09-20', status: 'Completed', findingsCount: 2, passedChecks: 15 },
-    { id: 6, inspectionNumber: 'INSP-2026-006', type: 'Emergency Evacuation Routes', description: 'Fire extinguisher pressure checks and escape corridor clearance', projectId: 2, inspector: 'Sophie Dubois', scheduledDate: '2026-09-24', status: 'Scheduled', findingsCount: 1, passedChecks: 19 },
-    { id: 7, inspectionNumber: 'INSP-2026-007', type: 'Crane & Rigging Pre-Lift', description: 'Slings, shackles and ground load-bearing pad inspection', projectId: 1, inspector: 'Amir Patel', scheduledDate: '2026-09-12', status: 'Completed', findingsCount: 0, passedChecks: 10 }
+    { id: 1, nr: 332, inspectionNumber: 'INSP-2026-001', type: 'Quarterly', description: 'Perimeter fencing, scaffolding toe-boards & edge protection review', projectId: 1, inspector: 'Sophie Dubois', location: 'Rotterdam Port - Quay 4', scheduledDate: '2026-09-22', status: 'Scheduled', findingsCount: 2, actionsCount: 3, passedChecks: 18 },
+    { id: 2, nr: 330, inspectionNumber: 'INSP-2026-002', type: 'Quarterly', description: 'Temporary distribution boards and earth-leakage breakers verification', projectId: 1, inspector: 'Amir Patel', location: 'Rotterdam Port - Quay 4', scheduledDate: '2026-09-18', status: 'Completed', findingsCount: 1, actionsCount: 2, passedChecks: 14 },
+    { id: 3, nr: 328, inspectionNumber: 'INSP-2026-003', type: 'Werkbus', description: 'Verification of harness test stamps and anchor line tensioning', projectId: 1, inspector: 'L. Hofman', location: 'Zone B - Roof edge', scheduledDate: '2026-09-15', status: 'Completed', findingsCount: 0, actionsCount: 0, passedChecks: 16 },
+    { id: 4, nr: 327, inspectionNumber: 'INSP-2026-004', type: 'Quarterly', description: 'Flammables locker ventilation, spill kits and SDS accessibility', projectId: 1, inspector: 'Sophie Dubois', location: 'Chemical store', scheduledDate: '2026-09-25', status: 'Scheduled', findingsCount: 0, actionsCount: 0, passedChecks: 12 },
+    { id: 5, nr: 325, inspectionNumber: 'INSP-2026-005', type: 'Quarterly', description: 'Aerosol concentration check during ceiling drywall demolition', projectId: 2, inspector: 'Markus Vance', location: 'Amsterdam HQ - Block B', scheduledDate: '2026-09-20', status: 'Completed', findingsCount: 2, actionsCount: 4, passedChecks: 15 },
+    { id: 6, nr: 324, inspectionNumber: 'INSP-2026-006', type: 'Werkbus', description: 'Fire extinguisher pressure checks and escape corridor clearance', projectId: 2, inspector: 'Sophie Dubois', location: 'Floor 3 - Atrium', scheduledDate: '2026-09-24', status: 'Scheduled', findingsCount: 1, actionsCount: 1, passedChecks: 19 },
+    { id: 7, nr: 322, inspectionNumber: 'INSP-2026-007', type: 'Quarterly', description: 'Slings, shackles and ground load-bearing pad inspection', projectId: 1, inspector: 'Amir Patel', location: 'Crane pad Zone A', scheduledDate: '2026-09-12', status: 'Completed', findingsCount: 2, actionsCount: 3, passedChecks: 10 },
+    { id: 8, nr: 320, inspectionNumber: 'INSP-2026-008', type: 'Quarterly', description: 'Dust extraction and ventilation performance test', projectId: 3, inspector: 'Jane Smith', location: 'Munich Warehouse Center', scheduledDate: '2026-09-19', status: 'Completed', findingsCount: 3, actionsCount: 5, passedChecks: 11 },
+    { id: 9, nr: 318, inspectionNumber: 'INSP-2026-009', type: 'Monthly', description: 'Housekeeping and waste segregation round, all decks', projectId: 1, inspector: 'Sophie Dubois', location: 'Quay 4 - all bays', scheduledDate: '2026-08-28', status: 'Completed', findingsCount: 4, actionsCount: 4, passedChecks: 22 },
+    { id: 10, nr: 317, inspectionNumber: 'INSP-2026-010', type: 'Monthly', description: 'PPE and fall-arrest register spot-check, crew B and C', projectId: 1, inspector: 'L. Hofman', location: 'Muster point 2', scheduledDate: '2026-08-14', status: 'Completed', findingsCount: 3, actionsCount: 3, passedChecks: 17 },
+    { id: 11, nr: 316, inspectionNumber: 'INSP-2026-011', type: 'Pre-lift', description: 'Tower crane pre-lift rigging and ground condition check', projectId: 1, inspector: 'Tom Willemsen', location: 'Crane pad Zone A', scheduledDate: '2026-09-05', status: 'Completed', findingsCount: 1, actionsCount: 2, passedChecks: 12 },
+    { id: 12, nr: 315, inspectionNumber: 'INSP-2026-012', type: 'Pre-lift', description: 'Mobile crane outrigger and sling certification review', projectId: 1, inspector: 'Amir Patel', location: 'Laydown area East', scheduledDate: '2026-07-30', status: 'Completed', findingsCount: 2, actionsCount: 2, passedChecks: 9 }
+  ],
+  // --- Incidents module (mirrors prod #/incidents: NR/DATE/TYPE/PROJECT/DESC/COMPANY/STATUS) ---
+  incidents: [
+    { id: 1, nr: 262, date: '2026-01-23', type: 'Accident (No Negligence)', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Ankle twist on uneven quay surface during night shift', companyName: 'Loggix Bouw', severity: 'Medium', findingsCount: 2, actionsCount: 3, status: 'Open', reporter: 'M. de Vries' },
+    { id: 2, nr: 261, date: '2026-01-23', type: 'Dangerous Situation', projectId: 2, projectName: 'Test project 1', description: 'Unsecured cable tray above walkway, near-miss reported', companyName: 'Elektro Peters', severity: 'High', findingsCount: 1, actionsCount: 2, status: 'Open', reporter: 'Karim El Idrissi' },
+    { id: 3, nr: 260, date: '2026-01-18', type: 'Near-miss', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Falling shackle from crane hook, exclusion zone held', companyName: 'Hijs & Transport BV', severity: 'High', findingsCount: 2, actionsCount: 2, status: 'In Review', reporter: 'Tom Willemsen' },
+    { id: 4, nr: 259, date: '2026-01-10', type: 'Dangerous Situation', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Gas monitor alarm in confined sump, evacuated correctly', companyName: 'Scaffolding NL', severity: 'Critical', findingsCount: 3, actionsCount: 4, status: 'Open', reporter: 'L. Hofman' },
+    { id: 5, nr: 258, date: '2025-12-20', type: 'Accident (No Negligence)', projectId: 3, projectName: 'Warehouse fit-out', description: 'Forklift mirror strike on racking, no injury', companyName: 'Loggix Bouw', severity: 'Low', findingsCount: 1, actionsCount: 1, status: 'Closed', reporter: 'Sven Bakker' },
+    { id: 6, nr: 257, date: '2025-12-12', type: 'Near-miss', projectId: 2, projectName: 'Test project 1', description: 'Dust cloud above OEL during drywall cutting', companyName: 'Van Dijk Infra', severity: 'Medium', findingsCount: 1, actionsCount: 2, status: 'Closed', reporter: 'Bram Koster' },
+    { id: 7, nr: 264, date: '2026-03-04', type: 'Near-miss', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Scaffold coupler dropped from second lift, no injury', companyName: 'Scaffolding NL', severity: 'Medium', findingsCount: 1, actionsCount: 2, status: 'Closed', reporter: 'Marc Dubois' },
+    { id: 8, nr: 265, date: '2026-04-11', type: 'Dangerous Situation', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Temporary cable crossing walkway without ramp cover', companyName: 'Elektro Peters', severity: 'Medium', findingsCount: 2, actionsCount: 2, status: 'Closed', reporter: 'Amir Patel' },
+    { id: 9, nr: 266, date: '2026-05-19', type: 'Near-miss', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Reversing telehandler near-miss with banksman out of position', companyName: 'Hijs & Transport BV', severity: 'High', findingsCount: 2, actionsCount: 3, status: 'In Review', reporter: 'Tom Willemsen' },
+    { id: 10, nr: 267, date: '2026-06-22', type: 'Dangerous Situation', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Flammables locker left unlocked over weekend', companyName: 'Loggix Bouw', severity: 'High', findingsCount: 1, actionsCount: 2, status: 'Open', reporter: 'Sophie Dubois' },
+    { id: 11, nr: 268, date: '2026-07-15', type: 'Near-miss', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Harness lanyard clipped to non-rated rail during inspection', companyName: 'Scaffolding NL', severity: 'Medium', findingsCount: 1, actionsCount: 1, status: 'Closed', reporter: 'L. Hofman' },
+    { id: 12, nr: 269, date: '2026-08-09', type: 'Accident (No Negligence)', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Splinter injury during formwork stripping, first aid only', companyName: 'Loggix Bouw', severity: 'Low', findingsCount: 1, actionsCount: 1, status: 'Closed', reporter: 'Pieter de Jong' },
+    { id: 13, nr: 270, date: '2026-09-02', type: 'Dangerous Situation', projectId: 1, projectName: 'Shantanu Test Thursday', description: 'Dust extraction hose detached in enclosed stairwell', companyName: 'Van Dijk Infra', severity: 'Medium', findingsCount: 2, actionsCount: 2, status: 'Open', reporter: 'Bram Koster' }
+  ],
+  // --- Findings module (mirrors prod #/findings: NR/TYPE/DATE/KIND/FINDING) ---
+  findings: [
+    { id: 1, nr: 586, type: 'Inspection', date: '2026-08-18', projectId: 1, projectName: 'Shantanu Test Thursday', kind: 'Scaffold check / INSP-2026-001', title: 'Missing toe-board on bay 4, second lift', reporter: 'Sophie Dubois', actionsCount: 2, status: 'Open' },
+    { id: 2, nr: 585, type: 'Inspection', date: '2026-08-05', projectId: 1, projectName: 'Shantanu Test Thursday', kind: 'LOTO audit / INSP-2026-002', title: 'Distribution board earth-leakage sticker expired', reporter: 'Amir Patel', actionsCount: 1, status: 'Open' },
+    { id: 3, nr: 576, type: 'Inspection', date: '2026-01-23', projectId: 2, projectName: 'Test project 1', kind: 'Schaftuimte / 330', title: 'Test finding - emergency exit blocked by pallets', reporter: 'Pratiksha P Dubale', actionsCount: 10, status: 'Open' },
+    { id: 4, nr: 574, type: 'Inspection', date: '2026-01-21', projectId: 2, projectName: 'Test project 1', kind: 'Interne regels procedures zijn b...', title: 'abc - PPE register incomplete for subcontractor crew', reporter: 'Pratiksha P Dubale', actionsCount: 1, status: 'In Progress' },
+    { id: 5, nr: 570, type: 'Inspection', date: '2025-11-10', projectId: 1, projectName: 'Shantanu Test Thursday', kind: 'Is de brdrjfswagen opgeruimd ...', title: 'Work bus housekeeping - oil spill kit missing', reporter: 'Shantanu ss Pujari', actionsCount: 0, status: 'Closed' },
+    { id: 6, nr: 569, type: 'Incident', date: '2026-01-23', projectId: 1, projectName: 'Shantanu Test Thursday', kind: 'Incident 262 - ankle twist', title: 'Uneven surface lighting below 50 lux on quay', reporter: 'M. de Vries', actionsCount: 3, status: 'Open' },
+    { id: 7, nr: 568, type: 'Incident', date: '2026-01-10', projectId: 1, projectName: 'Shantanu Test Thursday', kind: 'Incident 259 - gas alarm', title: 'Sump ventilation fan undersized for volume', reporter: 'L. Hofman', actionsCount: 4, status: 'Open' }
   ],
   siteCheckIns: [
     { id: 1, employeeId: 1, name: 'Tom Willemsen', company: 'Hijs & Transport BV', role: 'Machinist / Crane Operator', checkInTime: '06:45 AM', badgeNumber: 'SITE-081', certStatus: 'Valid', certName: 'Forklift & VCA-B', projectId: 1, status: 'On Site' },
@@ -2344,59 +2375,66 @@ export const store = reactive({
     return (this.siteCheckIns || []).filter(c => c.projectId === pId);
   },
 
-  getProjectIncidentDistribution(projectId) {
-    // Return realistic root cause data
+  getProjectIncidents(projectId) {
+    if (!projectId || projectId === 'all') return this.incidents || [];
     const pId = parseInt(projectId, 10);
-    const distributions = {
-      1: [
-        { label: 'Working at Height', value: 14, color: '#ef4444' },
-        { label: 'Moving Machinery / Crane', value: 9, color: '#f97316' },
-        { label: 'Slips, Trips & Falls', value: 8, color: '#eab308' },
-        { label: 'Electrical / Cable Contact', value: 5, color: '#0284c7' },
-        { label: 'PPE Non-Compliance', value: 4, color: '#8b5cf6' }
-      ],
-      2: [
-        { label: 'Dust & Vapour Inhalation', value: 11, color: '#f97316' },
-        { label: 'Manual Handling & Strain', value: 10, color: '#eab308' },
-        { label: 'Power Tools & Noise', value: 7, color: '#0284c7' },
-        { label: 'Slips, Trips & Falls', value: 6, color: '#ef4444' },
-        { label: 'Electrical Wiring', value: 3, color: '#8b5cf6' }
-      ]
-    };
-    return distributions[pId] || [
-      { label: 'Working at Height', value: 12, color: '#ef4444' },
-      { label: 'Machinery & Equipment', value: 8, color: '#f97316' },
-      { label: 'Slips, Trips & Falls', value: 7, color: '#eab308' },
-      { label: 'Chemical Handling', value: 5, color: '#0284c7' },
-      { label: 'PPE Compliance', value: 4, color: '#8b5cf6' }
-    ];
+    return (this.incidents || []).filter(i => i.projectId === pId);
+  },
+
+  getProjectFindings(projectId) {
+    if (!projectId || projectId === 'all') return this.findings || [];
+    const pId = parseInt(projectId, 10);
+    return (this.findings || []).filter(f => f.projectId === pId);
+  },
+
+  addIncident(data) {
+    const nextId = this.incidents.length > 0 ? Math.max(...this.incidents.map(i => i.id)) + 1 : 1;
+    const nextNr = Math.max(...this.incidents.map(i => i.nr)) + 1;
+    const project = this.projects.find(p => p.id === parseInt(data.projectId, 10));
+    this.incidents.unshift({
+      id: nextId, nr: nextNr, date: new Date().toISOString().split('T')[0],
+      type: data.type || 'Dangerous Situation', projectId: parseInt(data.projectId, 10),
+      projectName: project ? project.name : '', description: data.description || '',
+      companyName: data.companyName || '', severity: data.severity || 'Medium',
+      findingsCount: 0, actionsCount: 0, status: 'Open', reporter: data.reporter || 'Current User'
+    });
+    this.addToast(`Incident #${nextNr} reported.`, 'success');
+  },
+
+  addFinding(data) {
+    const nextId = this.findings.length > 0 ? Math.max(...this.findings.map(f => f.id)) + 1 : 1;
+    const nextNr = Math.max(...this.findings.map(f => f.nr)) + 1;
+    const project = this.projects.find(p => p.id === parseInt(data.projectId, 10));
+    this.findings.unshift({
+      id: nextId, nr: nextNr, type: data.type || 'Inspection', date: new Date().toISOString().split('T')[0],
+      projectId: parseInt(data.projectId, 10), projectName: project ? project.name : '',
+      kind: data.kind || '', title: data.title || '', reporter: data.reporter || 'Current User',
+      actionsCount: 0, status: 'Open'
+    });
+    this.addToast(`Finding #${nextNr} registered.`, 'success');
+  },
+
+  getProjectIncidentDistribution(projectId) {
+    const list = this.getProjectIncidents(projectId);
+    if (!list || list.length === 0) return [];
+    const colors = { 'Accident (No Negligence)': '#ef4444', 'Dangerous Situation': '#f97316', 'Near-miss': '#eab308', 'Inspection': '#0284c7' };
+    const map = {};
+    list.forEach(i => { map[i.type] = (map[i.type] || 0) + 1; });
+    return Object.entries(map).map(([label, value]) => ({ label, value, color: colors[label] || '#8b5cf6' }));
   },
 
   getProjectInspectionDistribution(projectId) {
-    const pId = parseInt(projectId, 10);
-    const audits = {
-      1: [
-        { category: 'Housekeeping', passed: 24, findings: 3 },
-        { category: 'Scaffolding', passed: 19, findings: 4 },
-        { category: 'Lifting & Rigging', passed: 15, findings: 1 },
-        { category: 'Electrical', passed: 18, findings: 2 },
-        { category: 'PPE / Fall Arrest', passed: 22, findings: 1 }
-      ],
-      2: [
-        { category: 'Housekeeping', passed: 20, findings: 2 },
-        { category: 'Dust / Ventilation', passed: 14, findings: 3 },
-        { category: 'Power Tools', passed: 17, findings: 1 },
-        { category: 'Fire / Escape', passed: 21, findings: 1 },
-        { category: 'PPE Compliance', passed: 19, findings: 2 }
-      ]
-    };
-    return audits[pId] || [
-      { category: 'Housekeeping', passed: 22, findings: 2 },
-      { category: 'Scaffolding', passed: 18, findings: 3 },
-      { category: 'Machinery', passed: 16, findings: 2 },
-      { category: 'Chemical', passed: 14, findings: 1 },
-      { category: 'PPE Compliance', passed: 25, findings: 1 }
-    ];
+    const list = this.getProjectInspections(projectId);
+    if (!list || list.length === 0) return [];
+    // Group by inspection type: Passed vs Findings
+    const map = {};
+    list.forEach(i => {
+      const key = i.type || 'General';
+      if (!map[key]) map[key] = { category: key, passed: 0, findings: 0 };
+      map[key].passed += i.passedChecks || 0;
+      map[key].findings += i.findingsCount || 0;
+    });
+    return Object.values(map).slice(0, 5);
   },
 
   // --- Company Dashboard Helpers ---
