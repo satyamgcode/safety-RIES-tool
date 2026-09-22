@@ -82,6 +82,12 @@ const handleCreateNew = () => {
       <!-- Dropdown and actions selector -->
       <div class="flex items-center gap-3">
         <button
+          @click="store.navigateTo('project-dashboard', { projectId: project.id !== 'all' ? project.id : 1 })"
+          class="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-xs flex items-center gap-1.5 transition-all duration-150"
+        >
+          <span>Project Dashboard</span>
+        </button>
+        <button
           @click="store.navigateTo('hazards')"
           class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold text-xs px-3.5 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all duration-150"
         >

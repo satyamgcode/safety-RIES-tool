@@ -15,6 +15,8 @@ import CompareVersions from './pages/CompareVersions.vue';
 import WorkflowGuide from './pages/WorkflowGuide.vue';
 
 import Dashboard from './pages/Dashboard.vue';
+import ProjectDashboard from './pages/ProjectDashboard.vue';
+import CompanyDashboard from './pages/CompanyDashboard.vue';
 import ProjectList from './pages/ProjectList.vue';
 import ProjectDetails from './pages/ProjectDetails.vue';
 import AssessmentList from './pages/AssessmentList.vue';
@@ -60,9 +62,11 @@ const activeComponent = computed(() => {
 
   if (page === 'overview') return RieOverview;
   if (page === 'dashboard') return Dashboard;
+  if (page === 'project-dashboard') return ProjectDashboard;
+  if (page === 'company-dashboard') return CompanyDashboard;
   
   if (page === 'projects') {
-    return params.projectId ? ProjectDetails : ProjectList;
+    return params.projectId ? ProjectDashboard : ProjectList;
   }
   if (page === 'assessments') {
     return params.assessmentId ? AssessmentDetails : AssessmentList;

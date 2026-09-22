@@ -15,12 +15,16 @@ import {
   Beaker,
   Award,
   FileImage,
-  FileCheck
+  FileCheck,
+  Building2,
+  Building
 } from 'lucide-vue-next';
 
 // Exact tabs matching the Miro/Whimsical process layout + Guide + TRAs
 const navItems = [
   { name: 'RI&E Overview', page: 'dashboard', icon: LayoutDashboard },
+  { name: 'Project Dashboard', page: 'project-dashboard', icon: Building2 },
+  { name: 'Company Dashboard', page: 'company-dashboard', icon: Building },
   { name: 'Project RI&E List', page: 'project-list', icon: Briefcase },
   { name: 'Hazard Register', page: 'hazards', icon: ShieldAlert },
   { name: 'New Assessment', page: 'new-assessment', icon: ClipboardList },
@@ -66,6 +70,7 @@ const activePage = computed(() => {
           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200"
           :class="[
             activePage === item.page || 
+            (item.page === 'project-dashboard' && activePage === 'projects') ||
             (item.page === 'training-overview' && activePage === 'employee-certificates') ||
             (item.page === 'permits-dashboard' && activePage === 'permit-details')
               ? 'bg-brand-50 text-brand-600 shadow-sm shadow-brand-500/5 font-semibold'
@@ -76,6 +81,7 @@ const activePage = computed(() => {
             :is="item.icon"
             class="w-4.5 h-4.5 transition-transform duration-200"
             :class="activePage === item.page || 
+                    (item.page === 'project-dashboard' && activePage === 'projects') ||
                     (item.page === 'training-overview' && activePage === 'employee-certificates') ||
                     (item.page === 'permits-dashboard' && activePage === 'permit-details') 
                     ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-600'"

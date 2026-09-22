@@ -62,6 +62,229 @@ export const store = reactive({
     if (p.id === 5) p.name = "A12 viaduct";
     return p;
   }),
+  selectedCompanyId: 1,
+  companies: [
+    {
+      id: 1,
+      name: 'Shopify / Safety Systems NL',
+      displayName: 'Shopify',
+      type: 'Specialist Contractor',
+      category: 'Digital & Site Safety Solutions',
+      status: 'Active',
+      verificationStatus: 'Verified Contractor',
+      tier: 'Tier 1',
+      logo: 'S',
+      logoColor: 'from-emerald-500 to-green-600',
+      email: 'shantanupujari5@gmail.com',
+      phone: '+31 356 563 5635',
+      manager: 'Shantanu Pujari',
+      kvk: '45656',
+      vat: 'NL58464544353B01',
+      address: {
+        street: 'Gasthuisstraat',
+        number: '24',
+        postalCode: '4161CC',
+        city: 'Heukelum',
+        country: 'Netherlands'
+      },
+      website: 'https://safetysys.nl',
+      vcaCertification: 'VCA** Petrochemical Certified',
+      safetyScore: 95,
+      zeroLtiDays: 310,
+      activeProjectsCount: 2,
+      lastAuditDate: '2026-08-15',
+      lastLogin: 'Monday, 21-09-2026',
+      insurancePolicy: 'AVB-90281-NL (Cover: €5,000,000)'
+    },
+    {
+      id: 2,
+      name: 'Loggix Bouw',
+      displayName: 'Loggix Bouw',
+      type: 'General Contractor',
+      category: 'Structural & Concrete Construction',
+      status: 'Active',
+      verificationStatus: 'Verified Contractor',
+      tier: 'Tier 1',
+      logo: 'LB',
+      logoColor: 'from-blue-500 to-indigo-600',
+      email: 'operations@loggixbouw.nl',
+      phone: '+31 20 555 1234',
+      manager: 'Jeroen Lutmers',
+      kvk: '34198212',
+      vat: 'NL849302194B01',
+      address: {
+        street: 'Industrieweg',
+        number: '12',
+        postalCode: '1014AB',
+        city: 'Amsterdam',
+        country: 'Netherlands'
+      },
+      website: 'https://loggixbouw.nl',
+      vcaCertification: 'VCA** Corporate Certified',
+      safetyScore: 94,
+      zeroLtiDays: 142,
+      activeProjectsCount: 3,
+      lastAuditDate: '2026-07-20',
+      lastLogin: 'Friday, 18-09-2026',
+      insurancePolicy: 'AVB-44120-NL (Cover: €10,000,000)'
+    },
+    {
+      id: 3,
+      name: 'Hijs & Transport BV',
+      displayName: 'Hijs & Transport',
+      type: 'Heavy Equipment & Lifting',
+      category: 'Mobile Cranes & Logistics',
+      status: 'Active',
+      verificationStatus: 'Verified Contractor',
+      tier: 'Tier 1',
+      logo: 'HT',
+      logoColor: 'from-amber-500 to-orange-600',
+      email: 'planning@hijstransport.nl',
+      phone: '+31 10 440 9800',
+      manager: 'Markus Vance',
+      kvk: '24991021',
+      vat: 'NL992019481B01',
+      address: {
+        street: 'Havenkade',
+        number: '88',
+        postalCode: '3089KK',
+        city: 'Rotterdam',
+        country: 'Netherlands'
+      },
+      website: 'https://hijstransport.nl',
+      vcaCertification: 'VCA** Heavy Lifting Certified',
+      safetyScore: 98,
+      zeroLtiDays: 450,
+      activeProjectsCount: 2,
+      lastAuditDate: '2026-09-02',
+      lastLogin: 'Today, 08:30 AM',
+      insurancePolicy: 'AVB-88120-LIFT (Cover: €15,000,000)'
+    },
+    {
+      id: 4,
+      name: 'Scaffolding NL',
+      displayName: 'Scaffolding NL',
+      type: 'Work at Height Specialist',
+      category: 'Scaffolding & Edge Protection',
+      status: 'Active',
+      verificationStatus: 'Verified Contractor',
+      tier: 'Tier 2',
+      logo: 'SN',
+      logoColor: 'from-purple-500 to-indigo-600',
+      email: 'veiligheid@scaffolding.nl',
+      phone: '+31 30 777 4411',
+      manager: 'Marc Dubois',
+      kvk: '30129481',
+      vat: 'NL773910294B01',
+      address: {
+        street: 'Steigerweg',
+        number: '5',
+        postalCode: '3542CA',
+        city: 'Utrecht',
+        country: 'Netherlands'
+      },
+      website: 'https://scaffolding.nl',
+      vcaCertification: 'VCA* Scaffolding Certified',
+      safetyScore: 91,
+      zeroLtiDays: 98,
+      activeProjectsCount: 2,
+      lastAuditDate: '2026-06-11',
+      lastLogin: 'Yesterday, 16:15',
+      insurancePolicy: 'AVB-19920-WH (Cover: €5,000,000)'
+    }
+  ],
+  companyDocuments: [
+    {
+      id: 1,
+      companyId: 1,
+      title: 'Corporate Liability Insurance Policy (AVB)',
+      category: 'Insurance',
+      documentNumber: 'POL-AVB-2026-90281',
+      fileName: 'Corporate_Liability_Insurance_2026_Shopify.pdf',
+      fileSize: '2.4 MB',
+      issuedDate: '2026-01-01',
+      validUntil: '2027-01-01',
+      status: 'Verified',
+      uploadedBy: 'Shantanu Pujari',
+      reviewer: 'L. Hofman',
+      verifiedAt: '2026-01-15'
+    },
+    {
+      id: 2,
+      companyId: 1,
+      title: 'Chamber of Commerce (KVK) Handelsregister Extract',
+      category: 'Legal Registration',
+      documentNumber: 'KVK-45656-NL',
+      fileName: 'KVK_Commercial_Register_Extract_2026.pdf',
+      fileSize: '1.1 MB',
+      issuedDate: '2026-01-10',
+      validUntil: '2027-01-10',
+      status: 'Verified',
+      uploadedBy: 'Shantanu Pujari',
+      reviewer: 'L. Hofman',
+      verifiedAt: '2026-01-16'
+    },
+    {
+      id: 3,
+      companyId: 1,
+      title: 'VCA** Corporate Petrochemical Safety Certificate',
+      category: 'Safety Certification',
+      documentNumber: 'VCA-CORP-45656',
+      fileName: 'VCA_Company_Accreditation_Certificate.pdf',
+      fileSize: '3.8 MB',
+      issuedDate: '2024-05-12',
+      validUntil: '2027-05-12',
+      status: 'Verified',
+      uploadedBy: 'Shantanu Pujari',
+      reviewer: 'Safety Board NL',
+      verifiedAt: '2024-05-20'
+    },
+    {
+      id: 4,
+      companyId: 1,
+      title: 'Proof of Registered Office Address & Good Standing',
+      category: 'Compliance',
+      documentNumber: 'ADDR-4161CC-24',
+      fileName: 'Proof_Of_Address_Gasthuisstraat_Heukelum.pdf',
+      fileSize: '890 KB',
+      issuedDate: '2026-02-01',
+      validUntil: '2027-02-01',
+      status: 'Verified',
+      uploadedBy: 'Shantanu Pujari',
+      reviewer: 'L. Hofman',
+      verifiedAt: '2026-02-05'
+    },
+    {
+      id: 5,
+      companyId: 1,
+      title: 'Signed HSE Framework Safety Charter & Pledge',
+      category: 'HSE Protocol',
+      documentNumber: 'HSE-CHARTER-2026',
+      fileName: 'Signed_HSE_Safety_Charter_and_Site_Induction.pdf',
+      fileSize: '1.6 MB',
+      issuedDate: '2026-01-12',
+      validUntil: '2027-01-12',
+      status: 'Verified',
+      uploadedBy: 'Shantanu Pujari',
+      reviewer: 'Sophie Dubois',
+      verifiedAt: '2026-01-14'
+    },
+    {
+      id: 6,
+      companyId: 1,
+      title: 'Tax Good Standing & BTW Nil-Arrears Declaration',
+      category: 'Tax & Financial',
+      documentNumber: 'BELASTING-2026-09',
+      fileName: 'WKA_Tax_Authority_Declaration_Q3_2026.pdf',
+      fileSize: '740 KB',
+      issuedDate: '2026-07-01',
+      validUntil: '2026-10-01',
+      status: 'Expiring Soon',
+      uploadedBy: 'Shantanu Pujari',
+      reviewer: 'Finance Team',
+      verifiedAt: '2026-07-05'
+    }
+  ],
   employees: [
     { id: 1, name: 'Tom Willemsen', role: 'Machinist', company: 'Hijs & Transport BV', projectIds: [1, 2] },
     { id: 2, name: 'Sven Bakker', role: 'Voorman', company: 'Loggix Bouw', projectIds: [2] },
@@ -75,7 +298,9 @@ export const store = reactive({
     { id: 10, name: 'Sophie Dubois', role: 'Veiligheidskundige', company: 'HSE Consultant', projectIds: [3] },
     { id: 11, name: 'Marc Dubois', role: 'Steigerbouwer', company: 'Scaffolding NL', projectIds: [1, 5] },
     { id: 12, name: 'M. de Vries', role: 'Mechanical Supervisor', company: 'Loggix Bouw', projectIds: [1, 2] },
-    { id: 13, name: 'L. Hofman', role: 'HSE Coordinator', company: 'Apex Industrial Holdings', projectIds: [1, 2] }
+    { id: 13, name: 'L. Hofman', role: 'HSE Coordinator', company: 'Apex Industrial Holdings', projectIds: [1, 2] },
+    { id: 14, name: 'Shantanu Pujari', role: 'Solutions Architect & Lead', company: 'Shopify / Safety Systems NL', projectIds: [1, 2] },
+    { id: 15, name: 'Anika Sharma', role: 'Site Safety Specialist', company: 'Shopify / Safety Systems NL', projectIds: [1] }
   ],
   certificateTypes: [
     { id: 'bhv', name: 'BHV Bedrijfshulpverlening (BHV)', validityMonths: 12, satisfies: null },
@@ -114,7 +339,11 @@ export const store = reactive({
     { id: 26, employeeId: 11, typeId: 'bhv', certificateNumber: 'BHV-9944', issuer: 'Safety Training BV', issuedOn: relativeDate(-50), expiresOn: relativeDate(-50 + 365), status: 'Valid', history: [] },
     { id: 27, employeeId: 6, typeId: 'vca-b', certificateNumber: 'VB-9988', issuer: 'VCA NL', issuedOn: relativeDate(-450), expiresOn: relativeDate(-450 + 3650), status: 'Valid', history: [] },
     { id: 28, employeeId: 12, typeId: 'vca-b', certificateNumber: 'VB-8899', issuer: 'VCA NL', issuedOn: relativeDate(-100), expiresOn: relativeDate(-100 + 3650), status: 'Valid', history: [] },
-    { id: 29, employeeId: 12, typeId: 'heights', certificateNumber: 'WH-1211', issuer: 'Fall Safety NL', issuedOn: relativeDate(-750), expiresOn: relativeDate(-750 + 730), status: 'Expired', history: [] }
+    { id: 29, employeeId: 12, typeId: 'heights', certificateNumber: 'WH-1211', issuer: 'Fall Safety NL', issuedOn: relativeDate(-750), expiresOn: relativeDate(-750 + 730), status: 'Expired', history: [] },
+    { id: 30, employeeId: 14, typeId: 'vca-vol', certificateNumber: 'VV-880011', issuer: 'VCA Infra', issuedOn: relativeDate(-300), expiresOn: relativeDate(-300 + 3650), status: 'Valid', history: [] },
+    { id: 31, employeeId: 14, typeId: 'bhv', certificateNumber: 'BHV-44911', issuer: 'Safety First NL', issuedOn: relativeDate(-120), expiresOn: relativeDate(-120 + 365), status: 'Valid', history: [] },
+    { id: 32, employeeId: 15, typeId: 'vca-b', certificateNumber: 'VB-99120', issuer: 'VCA NL', issuedOn: relativeDate(-180), expiresOn: relativeDate(-180 + 3650), status: 'Valid', history: [] },
+    { id: 33, employeeId: 15, typeId: 'heights', certificateNumber: 'WH-66120', issuer: 'Fall Safety NL', issuedOn: relativeDate(-90), expiresOn: relativeDate(-90 + 730), status: 'Valid', history: [] }
   ],
   projectRequirements: {
     1: ['vca-b', 'heights'],
@@ -316,6 +545,39 @@ export const store = reactive({
         { status: 'Active', timestamp: '2026-08-21 08:00:00', by: 'Pieter de Jong' }
       ]
     }
+  ],
+  equipment: [
+    { id: 1, name: 'Liebherr L1-24 Tower Crane', tag: 'CRANE-01', type: 'Heavy Lifting', projectId: 1, operator: 'Tom Willemsen', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-11-20', location: 'Zone A - Crane Pad' },
+    { id: 2, name: 'Genie Z-45 Articulated Boom Lift', tag: 'MEWP-04', type: 'Work at Height', projectId: 1, operator: 'Marc Dubois', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-10-15', location: 'Facade North' },
+    { id: 3, name: 'Atlas Copco QAS 60 Generator', tag: 'GEN-02', type: 'Power Supply', projectId: 1, operator: 'Arthur King', status: 'In Use', certStatus: 'Due Soon', nextInspection: '2026-09-28', location: 'Temporary Substation' },
+    { id: 4, name: 'CAT 320 Hydraulic Excavator', tag: 'EXC-07', type: 'Earthmoving', projectId: 1, operator: 'Bram Koster', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-12-05', location: 'Foundation Trench' },
+    { id: 5, name: 'JLG 1930ES Electric Scissor Lift', tag: 'MEWP-09', type: 'Work at Height', projectId: 2, operator: 'Sven Bakker', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-10-30', location: 'Central Atrium' },
+    { id: 6, name: 'Hilti Vac-40 Dust Extractor', tag: 'DUST-01', type: 'Air / Dust Control', projectId: 2, operator: 'Karim El Idrissi', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-11-12', location: 'Zone 2 Floor 3' },
+    { id: 7, name: 'Toyota 2.5T Electric Forklift', tag: 'FL-03', type: 'Material Handling', projectId: 2, operator: 'Tom Willemsen', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-10-02', location: 'Loading Bay B' },
+    { id: 8, name: 'Kaeser M50 Mobile Air Compressor', tag: 'COMP-03', type: 'Pneumatics', projectId: 3, operator: 'Jan de Vries', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-11-01', location: 'Warehouse Sector 4' },
+    { id: 9, name: 'Manitou MT 625 Telehandler', tag: 'TH-01', type: 'Material Handling', projectId: 5, operator: 'Pieter de Jong', status: 'Operational', certStatus: 'Certified', nextInspection: '2026-10-22', location: 'Pylon 3 West' }
+  ],
+  inspections: [
+    { id: 1, inspectionNumber: 'INSP-2026-001', type: 'Weekly Site Safety Walk', description: 'Perimeter fencing, scaffolding toe-boards & edge protection review', projectId: 1, inspector: 'Sophie Dubois', scheduledDate: '2026-09-22', status: 'Scheduled', findingsCount: 2, passedChecks: 18 },
+    { id: 2, inspectionNumber: 'INSP-2026-002', type: 'Electrical & LOTO Isolation', description: 'Temporary distribution boards and earth-leakage breakers verification', projectId: 1, inspector: 'Amir Patel', scheduledDate: '2026-09-18', status: 'Completed', findingsCount: 1, passedChecks: 14 },
+    { id: 3, inspectionNumber: 'INSP-2026-003', type: 'PPE & Fall Arrest Audit', description: 'Verification of harness test stamps and anchor line tensioning', projectId: 1, inspector: 'L. Hofman', scheduledDate: '2026-09-15', status: 'Completed', findingsCount: 0, passedChecks: 16 },
+    { id: 4, inspectionNumber: 'INSP-2026-004', type: 'Chemical & HazMat Storage', description: 'Flammables locker ventilation, spill kits and SDS accessibility', projectId: 1, inspector: 'Sophie Dubois', scheduledDate: '2026-09-25', status: 'Scheduled', findingsCount: 0, passedChecks: 12 },
+    { id: 5, inspectionNumber: 'INSP-2026-005', type: 'Indoor Air & Dust Extraction', description: 'Aerosol concentration check during ceiling drywall demolition', projectId: 2, inspector: 'Markus Vance', scheduledDate: '2026-09-20', status: 'Completed', findingsCount: 2, passedChecks: 15 },
+    { id: 6, inspectionNumber: 'INSP-2026-006', type: 'Emergency Evacuation Routes', description: 'Fire extinguisher pressure checks and escape corridor clearance', projectId: 2, inspector: 'Sophie Dubois', scheduledDate: '2026-09-24', status: 'Scheduled', findingsCount: 1, passedChecks: 19 },
+    { id: 7, inspectionNumber: 'INSP-2026-007', type: 'Crane & Rigging Pre-Lift', description: 'Slings, shackles and ground load-bearing pad inspection', projectId: 1, inspector: 'Amir Patel', scheduledDate: '2026-09-12', status: 'Completed', findingsCount: 0, passedChecks: 10 }
+  ],
+  siteCheckIns: [
+    { id: 1, employeeId: 1, name: 'Tom Willemsen', company: 'Hijs & Transport BV', role: 'Machinist / Crane Operator', checkInTime: '06:45 AM', badgeNumber: 'SITE-081', certStatus: 'Valid', certName: 'Forklift & VCA-B', projectId: 1, status: 'On Site' },
+    { id: 2, employeeId: 7, name: 'Pieter de Jong', company: 'Loggix Bouw', role: 'Carpenter & Formwork', checkInTime: '07:10 AM', badgeNumber: 'SITE-082', certStatus: 'Valid', certName: 'VCA-B & Heights', projectId: 1, status: 'On Site' },
+    { id: 3, employeeId: 11, name: 'Marc Dubois', company: 'Scaffolding NL', role: 'Lead Scaffolder', checkInTime: '07:20 AM', badgeNumber: 'SITE-083', certStatus: 'Valid', certName: 'Working at Heights', projectId: 1, status: 'On Site' },
+    { id: 4, employeeId: 12, name: 'M. de Vries', company: 'Loggix Bouw', role: 'Mechanical Supervisor', checkInTime: '07:30 AM', badgeNumber: 'SITE-084', certStatus: 'Valid', certName: 'VCA-B', projectId: 1, status: 'On Site' },
+    { id: 5, employeeId: 13, name: 'L. Hofman', company: 'Apex Industrial Holdings', role: 'HSE Coordinator', checkInTime: '08:00 AM', badgeNumber: 'SITE-085', certStatus: 'Valid', certName: 'HSE Lead', projectId: 1, status: 'On Site' },
+    { id: 6, employeeId: 4, name: 'Jeroen Lutmers', company: 'Loggix Bouw', role: 'Project Leader', checkInTime: '08:15 AM', badgeNumber: 'SITE-086', certStatus: 'Valid', certName: 'VCA-VOL', projectId: 1, status: 'On Site' },
+    { id: 7, employeeId: 2, name: 'Sven Bakker', company: 'Loggix Bouw', role: 'Voorman', checkInTime: '07:00 AM', badgeNumber: 'SITE-101', certStatus: 'Expiring', certName: 'BHV Expiring', projectId: 2, status: 'On Site' },
+    { id: 8, employeeId: 3, name: 'Karim El Idrissi', company: 'Elektro Peters', role: 'Elektromonteur', checkInTime: '07:15 AM', badgeNumber: 'SITE-102', certStatus: 'Valid', certName: 'NEN 3140', projectId: 2, status: 'On Site' },
+    { id: 9, employeeId: 5, name: 'Bram Koster', company: 'Van Dijk Infra', role: 'Sloper', checkInTime: '07:30 AM', badgeNumber: 'SITE-103', certStatus: 'Valid', certName: 'Heights', projectId: 2, status: 'On Site' },
+    { id: 10, employeeId: 6, name: 'Ria Smit', company: 'Dakwerken Jansen BV', role: 'Dakdekker', checkInTime: '07:45 AM', badgeNumber: 'SITE-104', certStatus: 'Valid', certName: 'VCA-B', projectId: 2, status: 'On Site' },
+    { id: 11, employeeId: 8, name: 'Jan de Vries', company: 'SteelWorks BV', role: 'Lasser', checkInTime: '08:00 AM', badgeNumber: 'SITE-105', certStatus: 'Valid', certName: 'VCA-B & NEN 3140', projectId: 2, status: 'On Site' }
   ],
   tras: [
     {
@@ -985,7 +1247,8 @@ export const store = reactive({
       'haz-substances-overview', 'haz-substances-register', 'haz-substances-add', 
       'haz-substances-detail', 'haz-substances-assessment',
       'training-overview', 'employee-certificates', 'image-to-base64',
-      'permits-dashboard', 'permit-details'
+      'permits-dashboard', 'permit-details', 'project-dashboard',
+      'company-dashboard'
     ];
     this.currentPage = validPages.includes(page) ? page : 'overview';
 
@@ -2048,6 +2311,185 @@ export const store = reactive({
     });
 
     this.addToast(`${name} removed from permit.`, 'warning');
+  },
+
+  // --- Project Dashboard Helpers ---
+  toggleActionStatus(actionId) {
+    const act = this.actions.find(a => a.id === actionId);
+    if (!act) return;
+    if (act.status === 'Completed') {
+      act.status = 'In Progress';
+      this.addToast(`Action #${act.id} marked as In Progress.`, 'info');
+    } else {
+      act.status = 'Completed';
+      this.addToast(`Action #${act.id} marked as Completed!`, 'success');
+    }
+  },
+
+  getProjectEquipment(projectId) {
+    if (!projectId || projectId === 'all') return this.equipment || [];
+    const pId = parseInt(projectId, 10);
+    return (this.equipment || []).filter(e => e.projectId === pId);
+  },
+
+  getProjectInspections(projectId) {
+    if (!projectId || projectId === 'all') return this.inspections || [];
+    const pId = parseInt(projectId, 10);
+    return (this.inspections || []).filter(i => i.projectId === pId);
+  },
+
+  getProjectCheckIns(projectId) {
+    if (!projectId || projectId === 'all') return this.siteCheckIns || [];
+    const pId = parseInt(projectId, 10);
+    return (this.siteCheckIns || []).filter(c => c.projectId === pId);
+  },
+
+  getProjectIncidentDistribution(projectId) {
+    // Return realistic root cause data
+    const pId = parseInt(projectId, 10);
+    const distributions = {
+      1: [
+        { label: 'Working at Height', value: 14, color: '#ef4444' },
+        { label: 'Moving Machinery / Crane', value: 9, color: '#f97316' },
+        { label: 'Slips, Trips & Falls', value: 8, color: '#eab308' },
+        { label: 'Electrical / Cable Contact', value: 5, color: '#0284c7' },
+        { label: 'PPE Non-Compliance', value: 4, color: '#8b5cf6' }
+      ],
+      2: [
+        { label: 'Dust & Vapour Inhalation', value: 11, color: '#f97316' },
+        { label: 'Manual Handling & Strain', value: 10, color: '#eab308' },
+        { label: 'Power Tools & Noise', value: 7, color: '#0284c7' },
+        { label: 'Slips, Trips & Falls', value: 6, color: '#ef4444' },
+        { label: 'Electrical Wiring', value: 3, color: '#8b5cf6' }
+      ]
+    };
+    return distributions[pId] || [
+      { label: 'Working at Height', value: 12, color: '#ef4444' },
+      { label: 'Machinery & Equipment', value: 8, color: '#f97316' },
+      { label: 'Slips, Trips & Falls', value: 7, color: '#eab308' },
+      { label: 'Chemical Handling', value: 5, color: '#0284c7' },
+      { label: 'PPE Compliance', value: 4, color: '#8b5cf6' }
+    ];
+  },
+
+  getProjectInspectionDistribution(projectId) {
+    const pId = parseInt(projectId, 10);
+    const audits = {
+      1: [
+        { category: 'Housekeeping', passed: 24, findings: 3 },
+        { category: 'Scaffolding', passed: 19, findings: 4 },
+        { category: 'Lifting & Rigging', passed: 15, findings: 1 },
+        { category: 'Electrical', passed: 18, findings: 2 },
+        { category: 'PPE / Fall Arrest', passed: 22, findings: 1 }
+      ],
+      2: [
+        { category: 'Housekeeping', passed: 20, findings: 2 },
+        { category: 'Dust / Ventilation', passed: 14, findings: 3 },
+        { category: 'Power Tools', passed: 17, findings: 1 },
+        { category: 'Fire / Escape', passed: 21, findings: 1 },
+        { category: 'PPE Compliance', passed: 19, findings: 2 }
+      ]
+    };
+    return audits[pId] || [
+      { category: 'Housekeeping', passed: 22, findings: 2 },
+      { category: 'Scaffolding', passed: 18, findings: 3 },
+      { category: 'Machinery', passed: 16, findings: 2 },
+      { category: 'Chemical', passed: 14, findings: 1 },
+      { category: 'PPE Compliance', passed: 25, findings: 1 }
+    ];
+  },
+
+  // --- Company Dashboard Helpers ---
+  getCompany(companyId) {
+    if (!companyId) return this.companies[0];
+    const cId = parseInt(companyId, 10);
+    return this.companies.find(c => c.id === cId) || this.companies[0];
+  },
+
+  getCompanyEmployees(companyId) {
+    const comp = this.getCompany(companyId);
+    if (!comp) return [];
+    return this.employees.filter(e => {
+      const eComp = (e.company || '').toLowerCase();
+      const cName = (comp.name || '').toLowerCase();
+      const cDisplay = (comp.displayName || '').toLowerCase();
+      return eComp.includes(cDisplay) || cName.includes(eComp);
+    });
+  },
+
+  getCompanyProjects(companyId) {
+    const compEmployees = this.getCompanyEmployees(companyId);
+    const pIds = new Set();
+    compEmployees.forEach(e => {
+      (e.projectIds || []).forEach(id => pIds.add(id));
+    });
+    // If no direct projectIds, default to first 2 projects
+    if (pIds.size === 0) {
+      pIds.add(1);
+      pIds.add(2);
+    }
+    return this.projects.filter(p => pIds.has(p.id));
+  },
+
+  getCompanyDocuments(companyId) {
+    const cId = parseInt(companyId, 10);
+    return (this.companyDocuments || []).filter(d => d.companyId === cId);
+  },
+
+  getCompanyPermits(companyId) {
+    const compEmployees = this.getCompanyEmployees(companyId);
+    const empIds = new Set(compEmployees.map(e => e.id));
+    return (this.permits || []).filter(p => {
+      if (p.holderId && empIds.has(p.holderId)) return true;
+      if (p.assignedEmployeeIds && p.assignedEmployeeIds.some(id => empIds.has(id))) return true;
+      return false;
+    });
+  },
+
+  getCompanyCertStats(companyId) {
+    const compEmployees = this.getCompanyEmployees(companyId);
+    const empIds = new Set(compEmployees.map(e => e.id));
+    const certs = (this.certificates || []).filter(c => empIds.has(c.employeeId));
+
+    const valid = certs.filter(c => c.status === 'Valid').length;
+    const expiring = certs.filter(c => c.status === 'Expiring').length;
+    const expired = certs.filter(c => c.status === 'Expired').length;
+    const total = certs.length;
+
+    const rate = total > 0 ? Math.round((valid / total) * 100) : 100;
+    return {
+      valid,
+      expiring,
+      expired,
+      total,
+      rate,
+      chartData: [
+        { label: 'Valid / Compliant', value: valid || 4, color: '#10b981' },
+        { label: 'Expiring Soon (<60d)', value: expiring || 1, color: '#f59e0b' },
+        { label: 'Expired / Action Needed', value: expired || 0, color: '#ef4444' }
+      ]
+    };
+  },
+
+  addCompanyDocument(doc) {
+    const newDoc = {
+      id: Date.now(),
+      companyId: doc.companyId || 1,
+      title: doc.title,
+      category: doc.category || 'General Compliance',
+      documentNumber: doc.documentNumber || `DOC-${Math.floor(1000 + Math.random() * 9000)}`,
+      fileName: doc.fileName || 'Uploaded_Document.pdf',
+      fileSize: '1.8 MB',
+      issuedDate: new Date().toISOString().split('T')[0],
+      validUntil: doc.validUntil || '2027-01-01',
+      status: 'Verified',
+      uploadedBy: 'Current User',
+      reviewer: 'HSE Compliance Lead',
+      verifiedAt: new Date().toISOString().split('T')[0]
+    };
+    if (!this.companyDocuments) this.companyDocuments = [];
+    this.companyDocuments.unshift(newDoc);
+    this.addToast(`Document "${newDoc.title}" uploaded and verified successfully!`, 'success');
   }
 });
 
