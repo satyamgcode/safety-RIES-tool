@@ -18,11 +18,6 @@ const activeProjectId = computed(() => {
   return 1;
 });
 const project = computed(() => store.projects.find(p => p.id === activeProjectId.value) || store.projects[0]);
-const handleProjectSwitch = (e) => {
-  const newId = parseInt(e.target.value, 10);
-  store.selectedProjectId = newId;
-  store.currentParams.projectId = newId;
-};
 const showQrModal = ref(false);
 const workerSearch = ref('');
 
@@ -193,38 +188,91 @@ const quickAddFinding = () => {
 
 <template>
   <div class="space-y-6 pb-16" v-if="project">
-    <!-- Header: white card, project palette only (brand / success / warning / slate) -->
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <div class="px-5 pt-4 pb-3 relative overflow-hidden">
-        <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-brand-50 blur-3xl pointer-events-none"></div>
-        <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
+    <!-- Header: maximal brand banner (project palette only) -->
+    <div class="rounded-2xl overflow-hidden border border-brand-100 shadow-sm">
+      <div class="relative bg-brand-800 px-5 pt-5 pb-5 text-white overflow-hidden">
+        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 260" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="hdr-grid" width="36" height="36" patternUnits="userSpaceOnUse">
+              <path d="M36 0H0V36" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1" />
+            </pattern>
+            <pattern id="hdr-dots" width="18" height="18" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.4" fill="#ffffff" fill-opacity="0.14" />
+            </pattern>
+            <linearGradient id="hdr-fade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#0c3a54" stop-opacity="0.55" />
+              <stop offset="0.45" stop-color="#0c3a54" stop-opacity="0.05" />
+              <stop offset="1" stop-color="#0c3a54" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <rect width="1200" height="260" fill="url(#hdr-grid)" />
+          <rect x="760" y="0" width="440" height="260" fill="url(#hdr-dots)" opacity="0.6" />
+          <rect width="1200" height="260" fill="url(#hdr-fade)" />
+          <g fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.5">
+            <circle cx="1010" cy="130" r="70" />
+            <circle cx="1010" cy="130" r="105" stroke-dasharray="5 7" />
+            <circle cx="1010" cy="130" r="140" stroke-opacity="0.07" />
+          </g>
+          <text x="960" y="205" font-size="120" font-weight="800" fill="#ffffff" fill-opacity="0.06" letter-spacing="4">HSE</text>
+          <g stroke="#ffffff" stroke-opacity="0.28" stroke-width="2" fill="none">
+            <polyline points="60,218 240,218 300,170 470,170 530,210 700,210" stroke-dasharray="7 6" stroke-linecap="round" />
+          </g>
+          <g fill="#ffffff">
+            <circle cx="60" cy="218" r="4" fill-opacity="0.5" />
+            <circle cx="300" cy="170" r="4" fill-opacity="0.5" />
+            <circle cx="530" cy="210" r="4" fill-opacity="0.5" />
+            <circle cx="700" cy="210" r="5" fill-opacity="0.8" />
+          </g>
+          <g fill="#ffffff" fill-opacity="0.13">
+            <rect x="880" y="60" width="10" height="170" rx="2" />
+            <rect x="820" y="72" width="150" height="9" rx="2" />
+            <rect x="890" y="52" width="26" height="16" rx="2" />
+            <rect x="876" y="81" width="3" height="70" />
+            <rect x="868" y="151" width="19" height="13" rx="1.5" />
+            <rect x="760" y="205" width="70" height="25" rx="2" />
+            <rect x="836" y="205" width="70" height="25" rx="2" />
+            <rect x="912" y="205" width="70" height="25" rx="2" />
+            <rect x="752" y="230" width="238" height="8" rx="2" fill-opacity="0.10" />
+          </g>
+          <g fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2">
+            <path d="M180 52a26 26 0 0 1 52 0v8h-52z" />
+            <rect x="172" y="60" width="68" height="7" rx="3.5" />
+          </g>
+        </svg>
+        <div class="absolute -left-16 -bottom-28 w-72 h-72 rounded-full bg-brand-400/20 blur-3xl pointer-events-none"></div>
+        <div class="relative flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+          <div class="min-w-0">
             <div class="flex items-center gap-2 flex-wrap text-[11px] font-bold">
-              <span class="px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 border border-brand-100 uppercase tracking-wider">Project #{{ project.id }}</span>
-              <span class="px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 border border-brand-100">{{ project.status }} Site</span>
-              <span class="px-2 py-0.5 rounded-md bg-success-50 text-success-700 border border-success-100 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse"></span>Live · {{ onSiteWorkers.length }} on-site</span>
-              <span v-if="criticalIncidents.length" class="px-2 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-100">{{ criticalIncidents.length }} critical incidents</span>
+              <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25 uppercase tracking-wider">Project #{{ project.id }}</span>
+              <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25">{{ project.status }} Site</span>
+              <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse"></span>Live · {{ onSiteWorkers.length }} on-site</span>
+              <span v-if="criticalIncidents.length" class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25">{{ criticalIncidents.length }} critical incidents</span>
+              <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25">{{ complianceRate }}% audit pass</span>
             </div>
-            <div class="flex items-center gap-3 mt-2 flex-wrap">
-              <h1 class="text-xl font-bold tracking-tight text-slate-800">{{ project.name }}</h1>
-              <select :value="project.id" @change="handleProjectSwitch" class="text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-600 rounded-lg px-2.5 py-1.5 cursor-pointer">
-                <option v-for="p in store.projects" :key="p.id" :value="p.id">Switch: {{ p.name }}</option>
-              </select>
+            <h1 class="text-2xl font-bold tracking-tight mt-2.5">{{ project.name }}</h1>
+            <div class="flex items-center gap-x-4 gap-y-1.5 mt-2 text-xs text-brand-50 flex-wrap">
+              <span class="flex items-center gap-1.5"><Briefcase class="w-3.5 h-3.5 opacity-80" />{{ project.client }}</span>
+              <span class="flex items-center gap-1.5"><MapPin class="w-3.5 h-3.5 opacity-80" />{{ project.location }}</span>
+              <span class="flex items-center gap-1.5"><User class="w-3.5 h-3.5 opacity-80" />{{ project.manager }}</span>
+              <span class="flex items-center gap-1.5"><Calendar class="w-3.5 h-3.5 opacity-80" />Audit <strong class="text-white">{{ project.reviewDueDate }}</strong></span>
             </div>
-            <div class="flex items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-slate-500 flex-wrap">
-              <span class="flex items-center gap-1.5"><Briefcase class="w-3.5 h-3.5 text-brand-500" />{{ project.client }}</span>
-              <span class="flex items-center gap-1.5"><MapPin class="w-3.5 h-3.5 text-brand-500" />{{ project.location }}</span>
-              <span class="flex items-center gap-1.5"><User class="w-3.5 h-3.5 text-brand-500" />{{ project.manager }}</span>
-              <span class="flex items-center gap-1.5"><Calendar class="w-3.5 h-3.5 text-brand-500" />Audit <strong class="text-warning-600">{{ project.reviewDueDate }}</strong></span>
+            <div class="flex items-center gap-4 mt-3 text-xs font-semibold">
+              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ openIncidents.length }}</span><span class="text-brand-100">incidents</span></span>
+              <span class="w-px h-4 bg-white/25"></span>
+              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ openFindings.length }}</span><span class="text-brand-100">findings</span></span>
+              <span class="w-px h-4 bg-white/25"></span>
+              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ openActions.length }}</span><span class="text-brand-100">actions</span></span>
+              <span class="w-px h-4 bg-white/25"></span>
+              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ activePermits.length }}</span><span class="text-brand-100">permits</span></span>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <div class="bg-success-50 border border-success-100 rounded-2xl px-3.5 py-2 flex items-center gap-2.5">
+            <div class="bg-white/15 border border-white/25 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 backdrop-blur">
               <div class="w-9 h-9 rounded-xl bg-success-500 flex items-center justify-center"><Shield class="w-4 h-4 text-white" /></div>
-              <div><div class="text-base font-bold leading-none text-slate-800">142</div><div class="text-[10px] font-bold uppercase tracking-wider text-success-700">Zero LTI days</div></div>
+              <div><div class="text-base font-bold leading-none">142</div><div class="text-[10px] font-bold uppercase tracking-wider text-brand-50">Zero LTI days</div></div>
             </div>
-            <button @click="showQrModal = true" class="px-3.5 py-2.5 text-xs font-bold bg-brand-50 border border-brand-100 text-brand-700 rounded-xl flex items-center gap-1.5"><QrCode class="w-4 h-4" />Site QR</button>
-            <button @click="store.wizard.info.projectId = project.id; store.navigateTo('create-assessment')" class="px-3.5 py-2.5 text-xs font-bold bg-brand-500 hover:bg-brand-600 text-white rounded-xl flex items-center gap-1.5"><Plus class="w-4 h-4" />Assessment</button>
+            <button @click="showQrModal = true" class="px-3.5 py-2.5 text-xs font-bold bg-white/15 border border-white/25 rounded-xl flex items-center gap-1.5 hover:bg-white/25"><QrCode class="w-4 h-4" />Site QR</button>
+            <button @click="store.wizard.info.projectId = project.id; store.navigateTo('create-assessment')" class="px-3.5 py-2.5 text-xs font-bold bg-white text-brand-700 rounded-xl flex items-center gap-1.5 shadow-lg"><Plus class="w-4 h-4" />Assessment</button>
           </div>
         </div>
       </div>
