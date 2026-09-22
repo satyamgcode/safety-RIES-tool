@@ -226,7 +226,7 @@ const quickAddFinding = () => {
   <div class="space-y-6 pb-16" v-if="project">
     <!-- Header: maximal brand banner (project palette only) -->
     <div class="rounded-2xl overflow-hidden border border-brand-100 shadow-sm">
-      <div class="relative bg-brand-800 px-5 pt-5 pb-5 text-white overflow-hidden">
+      <div class="relative bg-brand-800 px-5 pt-7 pb-7 text-white overflow-hidden min-h-[180px] flex flex-col justify-center">
         <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 260" preserveAspectRatio="xMidYMid slice">
           <defs>
             <pattern id="hdr-grid" width="36" height="36" patternUnits="userSpaceOnUse">
@@ -381,22 +381,17 @@ const quickAddFinding = () => {
             </div>
           </div>
         </div>
-        <div class="lg:col-span-5 rounded-2xl border border-slate-200 bg-white p-5 h-fit">
-          <div class="flex items-start justify-between">
-            <div><h3 class="text-sm font-bold text-slate-800">Verification coverage</h3><p class="text-xs text-slate-400 mt-0.5">{{ coverageTotals.n }} inspections · {{ coverageTotals.passed }} passed · {{ coverageTotals.findings }} findings</p></div>
-            <span class="text-xl font-bold" :class="complianceRate >= 90 ? 'text-success-700' : 'text-red-600'">{{ complianceRate }}%</span>
+        <div class="lg:col-span-5 rounded-2xl border border-slate-200 bg-white overflow-hidden h-fit">
+          <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2"><Truck class="w-4 h-4 text-brand-600" /><h3 class="text-sm font-black text-slate-900">Equipment · {{ projectEquipment.length }}</h3><span class="text-[11px] font-bold" :class="equipmentDue.length ? 'text-red-600' : 'text-slate-400'">{{ equipmentDue.length }} due</span></div>
           </div>
-          <div class="mt-4 space-y-3.5">
-            <div v-for="r in coverageRows" :key="r.type">
-              <div class="flex items-center justify-between text-xs mb-1">
-                <span class="font-bold text-slate-700">{{ r.type }}</span>
-                <span class="text-slate-400 font-semibold">{{ r.done }}/{{ r.n }} done · <strong class="text-slate-600">{{ r.rate }}%</strong> · {{ r.findings }} findings</span>
-              </div>
-              <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full bg-brand-500" :style="{ width: r.rate + '%' }"></div></div>
+          <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+            <div v-for="eq in projectEquipment" :key="eq.id" class="px-5 py-3 text-xs">
+              <div class="flex items-center gap-2"><span class="font-mono font-black text-slate-400">{{ eq.tag }}</span><span class="px-1.5 py-0.5 rounded-md text-[10px] font-black bg-brand-50 text-brand-700">{{ eq.type }}</span><span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-black" :class="eq.certStatus === 'Certified' ? 'bg-success-50 text-success-700' : 'bg-red-50 text-red-700'">{{ eq.certStatus }}</span></div>
+              <p class="font-bold text-slate-900 mt-1 leading-snug">{{ eq.name }}</p>
+              <p class="text-[11px] text-slate-400 mt-1">{{ eq.operator }} · {{ eq.location }} · <strong class="text-slate-600">next {{ eq.nextInspection }}</strong></p>
             </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between text-[11px] font-semibold text-slate-400">
-            <span>{{ projectTras.length }} TRAs linked</span><span>{{ openFindings.length }} findings open</span><span>{{ openActions.length }} actions open</span>
+            <div v-if="!projectEquipment.length" class="p-8 text-center text-xs text-slate-400">No equipment on this site.</div>
           </div>
         </div>
       </div>
