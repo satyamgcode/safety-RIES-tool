@@ -282,33 +282,16 @@ const quickAddFinding = () => {
               <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25 uppercase tracking-wider">Project #{{ project.id }}</span>
               <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25">{{ project.status }} Site</span>
               <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25 flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse"></span>Live · {{ onSiteWorkers.length }} on-site</span>
-              <span v-if="criticalIncidents.length" class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25">{{ criticalIncidents.length }} critical incidents</span>
-              <span class="px-2 py-0.5 rounded-md bg-white/15 border border-white/25">{{ complianceRate }}% audit pass</span>
             </div>
             <h1 class="text-2xl font-bold tracking-tight mt-2.5">{{ project.name }}</h1>
             <div class="flex items-center gap-x-4 gap-y-1.5 mt-2 text-xs text-brand-50 flex-wrap">
               <span class="flex items-center gap-1.5"><Briefcase class="w-3.5 h-3.5 opacity-80" />{{ project.client }}</span>
               <span class="flex items-center gap-1.5"><MapPin class="w-3.5 h-3.5 opacity-80" />{{ project.location }}</span>
               <span class="flex items-center gap-1.5"><User class="w-3.5 h-3.5 opacity-80" />{{ project.manager }}</span>
-              <span class="flex items-center gap-1.5"><Calendar class="w-3.5 h-3.5 opacity-80" />Audit <strong class="text-white">{{ project.reviewDueDate }}</strong></span>
-            </div>
-            <div class="flex items-center gap-4 mt-3 text-xs font-semibold">
-              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ openIncidents.length }}</span><span class="text-brand-100">incidents</span></span>
-              <span class="w-px h-4 bg-white/25"></span>
-              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ openFindings.length }}</span><span class="text-brand-100">findings</span></span>
-              <span class="w-px h-4 bg-white/25"></span>
-              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ openActions.length }}</span><span class="text-brand-100">actions</span></span>
-              <span class="w-px h-4 bg-white/25"></span>
-              <span class="flex items-center gap-1.5"><span class="text-base font-bold">{{ activePermits.length }}</span><span class="text-brand-100">permits</span></span>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <div class="bg-white/15 border border-white/25 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 backdrop-blur">
-              <div class="w-9 h-9 rounded-xl bg-success-500 flex items-center justify-center"><Shield class="w-4 h-4 text-white" /></div>
-              <div><div class="text-base font-bold leading-none">142</div><div class="text-[10px] font-bold uppercase tracking-wider text-brand-50">Zero LTI days</div></div>
-            </div>
             <button @click="showQrModal = true" class="px-3.5 py-2.5 text-xs font-bold bg-white/15 border border-white/25 rounded-xl flex items-center gap-1.5 hover:bg-white/25"><QrCode class="w-4 h-4" />Site QR</button>
-            <button @click="store.wizard.info.projectId = project.id; store.navigateTo('create-assessment')" class="px-3.5 py-2.5 text-xs font-bold bg-white text-brand-700 rounded-xl flex items-center gap-1.5 shadow-lg"><Plus class="w-4 h-4" />Assessment</button>
           </div>
         </div>
       </div>
