@@ -138,17 +138,53 @@ const coverageTotals = computed(() => ({
   passed: projectInspections.value.reduce((a, x) => a + (x.passedChecks || 0), 0),
   findings: projectInspections.value.reduce((a, x) => a + (x.findingsCount || 0), 0)
 }));
-const attentionQueue = computed(() => {
-  const q = [];
-  overdueActions.value.slice(0, 3).forEach(a => q.push({ kind: 'Overdue action', title: a.title, meta: `Due ${a.dueDate} · ${a.assignedTo}`, sev: 'red', icon: 'CheckSquare' }));
-  criticalIncidents.value.slice(0, 3).forEach(i => q.push({ kind: `Incident #${i.nr}`, title: `${i.type} — ${i.description}`, meta: `${i.date} · ${i.reporter} · ${i.severity}`, sev: 'red', icon: 'Siren' }));
-  openFindings.value.slice(0, 3).forEach(f => q.push({ kind: `Finding #${f.nr}`, title: f.title, meta: `${f.kind} · ${f.reporter} · ${f.actionsCount} actions`, sev: 'amber', icon: 'FileWarning' }));
-  awaitingPermits.value.slice(0, 2).forEach(p => q.push({ kind: 'Permit approval', title: `${p.permitNumber} — ${p.title}`, meta: `${p.type} · holder ${p.holderName}`, sev: 'amber', icon: 'FileCheck' }));
-  scheduledInspections.value.slice(0, 2).forEach(i => q.push({ kind: `Inspection #${i.nr}`, title: i.description, meta: `${i.scheduledDate} · ${i.inspector} · ${i.location}`, sev: 'blue', icon: 'ClipboardCheck' }));
-  if (certCompliance.value.gaps > 0) q.push({ kind: 'Cert gap', title: `${certCompliance.value.gaps} missing required certificates`, meta: `${certCompliance.value.workersCount} workers · ${certCompliance.value.percentage}% compliant`, sev: 'amber', icon: 'Award' });
-  equipmentDue.value.slice(0, 2).forEach(e => q.push({ kind: 'Equipment', title: `${e.tag} — ${e.name}`, meta: `Next ${e.nextInspection} · ${e.certStatus} · ${e.operator}`, sev: 'blue', icon: 'Wrench' }));
-  return q.slice(0, 8);
-});
+// Site status: one row per domain with spotlight detail + single action
+const incidentSpot = computed(() => criticalIncidents.value[0] || openIncidents.value[0]);
+const findingSpot = computed(() => openFindings.value[0]);
+const actionSpot = computed(() => overdueActions.value[0] || openActions.value[0]);
+const permitSpot = computed(() => awaitingPermits.value[0] || activePermits.value[0]);
+const statusRows = computed(() => [
+  {
+    key: 'inc', icon: 'Siren', label: 'Incidents',
+    state: criticalIncidents.value.length ? 'bad' : openIncidents.value.length ? 'warn' : 'ok',
+    stateText: criticalIncidents.value.length ? 'Needs action' : openIncidents.value.length ? 'Watch' : 'Healthy',
+    headline: `${openIncidents.value.length} open · ${criticalIncidents.value.length} critical · ${projectIncidents.value.length} total`,
+    meta: incidentSpot.value ? `${incidentSpot.value.type} — ${incidentSpot.value.description} · ${incidentSpot.value.date} · ${incidentSpot.value.reporter}` : 'No incidents recorded',
+    action: 'Report', run: quickReportIncident
+  },
+  {
+    key: 'fnd', icon: 'FileWarning', label: 'Findings & inspections',
+    state: openFindings.value.length >= 3 ? 'warn' : openFindings.value.length ? 'warn' : 'ok',
+    stateText: openFindings.value.length ? 'Watch' : 'Healthy',
+    headline: `${openFindings.value.length} open findings · ${projectInspections.value.length} inspections · ${scheduledInspections.value.length} scheduled`,
+    meta: findingSpot.value ? `${findingSpot.value.title} · ${findingSpot.value.kind} · ${findingSpot.value.reporter}` : 'No open findings',
+    action: 'Add', run: quickAddFinding
+  },
+  {
+    key: 'act', icon: 'CheckSquare', label: 'Actions',
+    state: overdueActions.value.length ? 'bad' : openActions.value.length ? 'warn' : 'ok',
+    stateText: overdueActions.value.length ? 'Needs action' : openActions.value.length ? 'Watch' : 'Healthy',
+    headline: `${openActions.value.length} open · ${overdueActions.value.length} overdue · ${highPriorityActions.value.length} high priority`,
+    meta: actionSpot.value ? `${actionSpot.value.title} · ${actionSpot.value.assignedTo} · due ${actionSpot.value.dueDate}` : 'All actions completed',
+    action: 'Tracker', run: () => store.navigateTo('actions')
+  },
+  {
+    key: 'ptw', icon: 'FileCheck', label: 'Permits to work',
+    state: awaitingPermits.value.length ? 'warn' : 'ok',
+    stateText: awaitingPermits.value.length ? 'Watch' : 'Healthy',
+    headline: `${activePermits.value.length} active · ${awaitingPermits.value.length} awaiting approval · ${projectPermits.value.length} total`,
+    meta: permitSpot.value ? `${permitSpot.value.permitNumber} — ${permitSpot.value.title} · ${permitSpot.value.type} · holder ${permitSpot.value.holderName} · until ${permitSpot.value.validTo}` : 'No permits on this site yet',
+    action: 'Permits', run: () => store.navigateTo('permits-dashboard')
+  },
+  {
+    key: 'team', icon: 'Users', label: 'Team & machines',
+    state: certCompliance.value.gaps ? 'bad' : equipmentDue.value.length ? 'warn' : 'ok',
+    stateText: certCompliance.value.gaps ? 'Needs action' : equipmentDue.value.length ? 'Watch' : 'Healthy',
+    headline: `${onSiteWorkers.value.length} on-site · ${certCompliance.value.percentage}% certs · ${certCompliance.value.gaps} gaps · ${projectEquipment.value.length} machines (${equipmentDue.value.length} due)`,
+    meta: equipmentDue.value[0] ? `${equipmentDue.value[0].tag} — ${equipmentDue.value[0].name} · ${equipmentDue.value[0].operator} · next ${equipmentDue.value[0].nextInspection}` : 'All machines certified',
+    action: 'Team', run: () => store.navigateTo('training-overview')
+  }
+]);
 
 const filteredWorkers = computed(() => {
   if (!workerSearch.value.trim()) return onSiteWorkers.value;
@@ -312,27 +348,25 @@ const quickAddFinding = () => {
         <div v-else class="rounded-2xl border border-success-100 bg-success-50 px-5 py-4 text-xs font-semibold text-success-700">All clear — no metric needs attention right now. {{ healthyLine }}</div>
       </div>
 
-      <!-- Triage wall: maximal density, minimal color -->
+      <!-- Site status: icon rows with spotlight detail + state pill + action -->
       <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-        <div class="px-5 py-4 bg-slate-50 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center"><ShieldAlert class="w-4 h-4" /></div>
-            <div><h3 class="text-sm font-black text-slate-900">Command triage — {{ attentionQueue.length }} items across 7 modules</h3><p class="text-xs text-slate-500">Overdue actions · critical incidents · findings · permits · inspections · certs · machines</p></div>
-          </div>
-          <div class="flex gap-2 flex-wrap">
-            <button @click="quickReportIncident" class="px-3 py-2 text-xs font-bold bg-brand-500 text-white rounded-xl flex items-center gap-1"><Plus class="w-3.5 h-3.5" />Incident</button>
-            <button @click="quickAddFinding" class="px-3 py-2 text-xs font-bold bg-white border border-slate-200 text-slate-600 rounded-xl flex items-center gap-1"><Plus class="w-3.5 h-3.5" />Finding</button>
-            <button @click="store.navigateTo('permits-dashboard')" class="px-3 py-2 text-xs font-bold bg-brand-500 text-white rounded-xl flex items-center gap-1">Permits<ChevronRight class="w-3.5 h-3.5" /></button>
-            <button @click="store.navigateTo('actions')" class="px-3 py-2 text-xs font-bold bg-white border border-slate-200 rounded-xl">Actions</button>
-          </div>
+        <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+          <div><h3 class="text-sm font-bold text-slate-800">Site status</h3><p class="text-xs text-slate-400">Is the site healthy? Fix what is red.</p></div>
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-full" :class="statusRows.some(r => r.state === 'bad') ? 'bg-red-50 text-red-700' : 'bg-success-50 text-success-700'">{{ statusRows.filter(r => r.state !== 'ok').length }} of {{ statusRows.length }} need attention</span>
         </div>
-        <div class="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5 items-start">
-          <div v-for="(q, i) in attentionQueue" :key="i" class="rounded-xl border border-slate-200 bg-white p-3 text-xs h-fit border-l-4" :class="barByKind(q.kind)">
-            <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{{ q.kind }}</span>
-            <p class="font-bold text-slate-900 mt-1.5 leading-snug line-clamp-2">{{ q.title }}</p>
-            <p class="text-[11px] text-slate-500 mt-1 truncate">{{ q.meta }}</p>
+        <div class="divide-y divide-slate-100">
+          <div v-for="r in statusRows" :key="r.key" class="px-5 py-3.5 flex items-center gap-3.5 hover:bg-slate-50/60 transition-colors">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="[r.state === 'bad' ? 'bg-red-50 text-red-600' : '', r.state === 'warn' ? 'bg-warning-50 text-warning-700' : '', r.state === 'ok' ? 'bg-success-50 text-success-700' : '']"><component :is="kpiIcons[r.icon]" class="w-4.5 h-4.5" /></div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ r.label }}</p>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded" :class="[r.state === 'bad' ? 'bg-red-50 text-red-700' : '', r.state === 'warn' ? 'bg-warning-50 text-warning-700' : '', r.state === 'ok' ? 'bg-success-50 text-success-700' : '']">{{ r.stateText }}</span>
+              </div>
+              <p class="text-sm font-bold text-slate-800 truncate mt-0.5">{{ r.headline }}</p>
+              <p class="text-xs text-slate-400 truncate">{{ r.meta }}</p>
+            </div>
+            <button @click="r.run()" class="px-3.5 py-2 text-xs font-bold rounded-xl shrink-0" :class="r.state === 'bad' ? 'bg-brand-500 text-white' : 'border border-slate-200 text-slate-600 hover:border-brand-300 hover:text-brand-700'">{{ r.action }}</button>
           </div>
-          <div v-if="!attentionQueue.length" class="col-span-4 py-6 text-center text-xs text-slate-400">All clear.</div>
         </div>
       </div>
 
